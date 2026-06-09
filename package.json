@@ -1,0 +1,12 @@
+{
+  "name": "fvn-debatt-plan3-auth",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check api/_plan3.js && node --check api/auth/login.js && node --check api/auth/session.js && node --check api/healthz.js && node --check api/me.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
