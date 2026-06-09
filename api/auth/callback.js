@@ -1,6 +1,6 @@
 import {
   buildAuthCookie,
-  extractVerifiedUser,
+  getVerifiedUser,
   json,
   normalizeUser,
   verifyPlan3Token,
@@ -26,7 +26,7 @@ export async function GET(request) {
     return json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const verifiedUser = extractVerifiedUser(verified.body);
+  const verifiedUser = getVerifiedUser(verified.body, token);
   const user = verifiedUser ? normalizeUser(verifiedUser) : null;
 
   if (!user || (!user.id && !user.email)) {

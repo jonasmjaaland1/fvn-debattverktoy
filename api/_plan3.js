@@ -27,6 +27,19 @@ function parseJsonOrNull(text) {
   }
 }
 
+function decodeJwtPayload(token) {
+  try {
+    const [, payload] = String(token || '').split('.');
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
 function json(data, init = {}) {
   return Response.json(data, {
     ...init,
@@ -193,6 +206,10 @@ function extractVerifiedUser(body = {}) {
   return candidates.find(isPlainObject) || null;
 }
 
+function getVerifiedUser(verifyBody, token) {
+  return extractVerifiedUser(verifyBody) || decodeJwtPayload(token);
+}
+
 function normalizeUser(verifiedUser) {
   const emailFromArray = Array.isArray(verifiedUser.userEmails) ? verifiedUser.userEmails[0] : null;
 
@@ -267,7 +284,7 @@ async function requireUser(request) {
     };
   }
 
-  const verifiedUser = extractVerifiedUser(verified.body);
+  const verifiedUser = getVerifiedUser(verified.body, token);
   if (!verifiedUser) {
     return {
       response: json({ error: 'invalid auth response' }, { status: 401 }),
@@ -289,6 +306,7 @@ export {
   buildLogoutCookie,
   buildPlan3LoginUrl,
   extractVerifiedUser,
+  getVerifiedUser,
   json,
   normalizeUser,
   requireUser,
