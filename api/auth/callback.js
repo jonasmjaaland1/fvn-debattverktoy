@@ -33,8 +33,12 @@ export async function GET(request) {
     return json({ error: 'invalid auth response' }, { status: 401 });
   }
 
-  const response = Response.redirect(new URL('/', request.url), 302);
-  response.headers.set('Set-Cookie', buildAuthCookie(token, request));
-  response.headers.set('Cache-Control', 'no-store');
-  return response;
+  return new Response(null, {
+    status: 302,
+    headers: {
+      'Cache-Control': 'no-store',
+      Location: new URL('/', request.url).toString(),
+      'Set-Cookie': buildAuthCookie(token, request),
+    },
+  });
 }
