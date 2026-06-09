@@ -451,6 +451,16 @@
         els.sideMessage.textContent = message;
       }
 
+      function friendlyError(err) {
+        const code = err.body?.error;
+        const message = err.message || '';
+
+        if (code === 'supabase_not_configured') return 'Supabase mangler env-variabler.';
+        if (code === 'graph_not_configured') return 'Outlook/Microsoft Graph mangler env-variabler.';
+        if (/invalid path specified/i.test(message)) return 'Supabase URL ser feil ut. Bruk prosjekt-URL-en, ikke en tabell- eller REST-path.';
+        return message || 'Ukjent feil.';
+      }
+
       async function api(path, options = {}) {
         const response = await fetch(path, {
           credentials: 'same-origin',
@@ -644,7 +654,7 @@
         } catch (err) {
           state.items = [];
           renderItems();
-          setSideMessage(err.body?.error === 'supabase_not_configured' ? 'Supabase mangler env-variabler.' : err.message, true);
+          setSideMessage(friendlyError(err), true);
         }
       }
 
@@ -655,7 +665,7 @@
           setSideMessage(`Importerte/oppdaterte ${payload.count} innlegg.`);
           await loadItems();
         } catch (err) {
-          setSideMessage(err.body?.error === 'graph_not_configured' ? 'Outlook/Microsoft Graph mangler env-variabler.' : err.message, true);
+          setSideMessage(friendlyError(err), true);
         }
       }
 
@@ -665,7 +675,7 @@
           const payload = await api('/api/mail/latest?top=10');
           setSideMessage(`Fant ${payload.count} e-poster i Outlook. Importer for å lagre dem.`);
         } catch (err) {
-          setSideMessage(err.body?.error === 'graph_not_configured' ? 'Outlook/Microsoft Graph mangler env-variabler.' : err.message, true);
+          setSideMessage(friendlyError(err), true);
         }
       }
 
@@ -682,7 +692,7 @@
           setSideMessage('Vurdering lagret.');
           selectItem(state.selectedId);
         } catch (err) {
-          setSideMessage(err.message, true);
+          setSideMessage(friendlyError(err), true);
         }
       }
 
@@ -698,7 +708,7 @@
           setSideMessage('Status lagret.');
           selectItem(state.selectedId);
         } catch (err) {
-          setSideMessage(err.message, true);
+          setSideMessage(friendlyError(err), true);
         }
       }
 
@@ -732,7 +742,7 @@
           setSideMessage('Manuelt innlegg lagret.');
           await loadItems();
         } catch (err) {
-          setSideMessage(err.body?.error === 'supabase_not_configured' ? 'Supabase mangler env-variabler.' : err.message, true);
+          setSideMessage(friendlyError(err), true);
         }
       });
 

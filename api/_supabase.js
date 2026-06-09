@@ -1,5 +1,5 @@
 function getSupabaseConfig() {
-  const url = process.env.SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.SUPABASE_URL);
   const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   return {
@@ -7,6 +7,17 @@ function getSupabaseConfig() {
     key,
     url: url?.replace(/\/+$/, ''),
   };
+}
+
+function normalizeSupabaseUrl(value) {
+  if (!value) return null;
+
+  try {
+    const parsed = new URL(String(value).trim());
+    return parsed.origin;
+  } catch {
+    return String(value).trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
+  }
 }
 
 function parseJsonOrNull(text) {
