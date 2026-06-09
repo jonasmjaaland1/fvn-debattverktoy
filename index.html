@@ -730,14 +730,15 @@
 
       document.getElementById('manualForm').addEventListener('submit', async (event) => {
         event.preventDefault();
-        const form = new FormData(event.currentTarget);
+        const formElement = event.currentTarget;
+        const form = new FormData(formElement);
         setSideMessage('Lagrer manuelt innlegg...');
         try {
           const payload = await api('/api/debate/manual', {
             body: JSON.stringify(Object.fromEntries(form.entries())),
             method: 'POST',
           });
-          event.currentTarget.reset();
+          formElement.reset();
           state.selectedId = payload.item.id;
           setSideMessage('Manuelt innlegg lagret.');
           await loadItems();
