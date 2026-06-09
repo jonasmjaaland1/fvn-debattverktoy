@@ -39,29 +39,55 @@
         line-height: 1.5;
       }
 
-      nav {
+      .actions {
         display: flex;
         flex-wrap: wrap;
         gap: 12px;
       }
 
-      a {
+      a,
+      button {
+        appearance: none;
+        background: transparent;
         border: 1px solid #c7c7c0;
         border-radius: 8px;
         color: inherit;
+        cursor: pointer;
         display: inline-flex;
+        font: inherit;
         font-weight: 650;
         padding: 12px 14px;
         text-decoration: none;
       }
 
-      a:hover {
+      a:hover,
+      button:hover {
         border-color: #171717;
       }
 
       #status {
         font-size: 0.95rem;
         margin-top: 22px;
+      }
+
+      #result {
+        border: 1px solid #d8d8d2;
+        border-radius: 8px;
+        margin-top: 20px;
+        max-width: 100%;
+        padding: 16px;
+      }
+
+      #result h2 {
+        font-size: 1rem;
+        margin: 0 0 10px;
+      }
+
+      pre {
+        margin: 0;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -74,12 +100,18 @@
           color: #bbb;
         }
 
-        a {
+        a,
+        button {
           border-color: #444;
         }
 
-        a:hover {
+        a:hover,
+        button:hover {
           border-color: #f4f4f0;
+        }
+
+        #result {
+          border-color: #333;
         }
       }
     </style>
@@ -88,38 +120,81 @@
     <main>
       <h1>FVN Debattverktøy</h1>
       <p>Auth-tjenesten er deployet. Logg inn med Plan3 for å teste redaksjonell tilgang.</p>
-      <nav aria-label="Snarveier">
-        <a href="/healthz">Health</a>
+      <div class="actions" aria-label="Snarveier">
+        <button type="button" id="healthButton">Health</button>
         <a href="/auth/login">Plan3-login</a>
-        <a href="/api/me">API-test</a>
-        <a href="/api/auth/logout">Logg ut</a>
-      </nav>
+        <button type="button" id="meButton">API-test</button>
+        <button type="button" id="logoutButton">Logg ut</button>
+      </div>
       <p id="status">Sjekker innlogging...</p>
+      <section id="result" hidden>
+        <h2 id="resultTitle"></h2>
+        <pre id="resultBody"></pre>
+      </section>
     </main>
     <script>
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const resultTitle = document.getElementById('resultTitle');
+      const resultBody = document.getElementById('resultBody');
+
       const url = new URL(window.location.href);
       if (url.searchParams.has('token')) {
         url.searchParams.delete('token');
         window.history.replaceState({}, document.title, url.toString());
       }
 
-      fetch('/api/me', { credentials: 'same-origin' })
-        .then(async (response) => {
-          if (!response.ok) return null;
-          return response.json();
-        })
-        .then((user) => {
-          const status = document.getElementById('status');
-          if (!user) {
+      function showResult(title, value) {
+        resultTitle.textContent = title;
+        resultBody.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+        result.hidden = false;
+      }
+
+      async function fetchJson(path) {
+        const response = await fetch(path, { credentials: 'same-origin' });
+        const text = await response.text();
+        const body = text ? JSON.parse(text) : null;
+        return { ok: response.ok, status: response.status, body };
+      }
+
+      async function checkSession(showDetails = false) {
+        try {
+          const response = await fetchJson('/api/me');
+          if (!response.ok) {
             status.textContent = 'Ikke innlogget.';
-            return;
+            if (showDetails) showResult('API-test', response.body || `HTTP ${response.status}`);
+            return null;
           }
 
+          const user = response.body;
           status.textContent = `Innlogget som ${user.name || user.email || user.id}.`;
-        })
-        .catch(() => {
-          document.getElementById('status').textContent = 'Kunne ikke sjekke innlogging.';
-        });
+          if (showDetails) showResult('API-test', response.body);
+          return response.body;
+        } catch {
+          status.textContent = 'Kunne ikke sjekke innlogging.';
+          if (showDetails) showResult('API-test', 'Kunne ikke hente brukerdata.');
+          return null;
+        }
+      }
+
+      document.getElementById('healthButton').addEventListener('click', async () => {
+        try {
+          const response = await fetchJson('/healthz');
+          showResult('Health', response.body || `HTTP ${response.status}`);
+        } catch {
+          showResult('Health', 'Health-sjekk feilet.');
+        }
+      });
+
+      document.getElementById('meButton').addEventListener('click', () => {
+        checkSession(true);
+      });
+
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        window.location.assign('/api/auth/logout');
+      });
+
+      checkSession();
     </script>
   </body>
 </html>
