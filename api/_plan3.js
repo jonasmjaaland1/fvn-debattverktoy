@@ -34,7 +34,14 @@ function decodeJwtPayload(token) {
 
     const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-    return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+    const jsonText =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(padded, 'base64').toString('utf8')
+        : new TextDecoder().decode(
+            Uint8Array.from(globalThis.atob(padded), (char) => char.charCodeAt(0)),
+          );
+
+    return JSON.parse(jsonText);
   } catch {
     return null;
   }
