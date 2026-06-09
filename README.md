@@ -10,6 +10,8 @@ Vercel Functions støtter Node.js-funksjoner direkte fra `/api`-mappen. Det pass
 
 - `GET /auth/login` - redirecter til Plan3-login
 - `GET /healthz` - health check
+- `GET /api/auth/callback` - tar imot Plan3-token, verifiserer og setter HttpOnly cookie
+- `GET /api/auth/logout` - tømmer innloggingscookie
 - `GET /api/me` - krever `Authorization: Bearer <token>`
 - `GET /api/auth/session` - krever `Authorization: Bearer <token>`
 
@@ -32,7 +34,9 @@ DEPLOYED_APP_URL=https://debattverktoy.dittdomene.no
 ALLOWED_REDIRECT_ORIGINS=https://debattverktoy.dittdomene.no
 ```
 
-Hvis `DEPLOYED_APP_URL` ikke er satt, bruker `/auth/login` URL-en requesten kom inn på som `redirectBackend`. Det gjør preview-testing på Vercel enklere.
+`/auth/login` bruker vanligvis URL-en requesten kom inn på, slik at Vercel preview/prod/custom domain fungerer uten at callback peker til en gammel deployment-URL. Plan3 sendes tilbake til `/api/auth/callback`, som setter en sikker `HttpOnly` cookie og sender brukeren videre til forsiden uten token i adressefeltet.
+
+Etter callback kan API-et brukes med cookie i nettleseren eller med `Authorization: Bearer <token>` fra tekniske klienter.
 
 ## Deploy
 
@@ -98,7 +102,7 @@ Forventet: `400` og `token query parameter is not accepted`.
 curl -i https://debattverktoy.dittdomene.no/auth/login
 ```
 
-Forventet: `302` redirect til Plan3-login.
+Forventet: `302` redirect til Plan3-login med `/api/auth/callback` som returadresse.
 
 Med ekte token:
 
@@ -108,3 +112,5 @@ curl -i https://debattverktoy.dittdomene.no/api/me \
 ```
 
 Forventet: `200` med begrenset brukerinfo.
+
+Etter vanlig nettleserinnlogging via `/auth/login` skal `/api/me` også fungere i nettleseren fordi cookien sendes automatisk. Direkte fra terminal uten cookie får du fortsatt `401`.

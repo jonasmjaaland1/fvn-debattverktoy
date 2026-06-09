@@ -59,6 +59,11 @@
         border-color: #171717;
       }
 
+      #status {
+        font-size: 0.95rem;
+        margin-top: 22px;
+      }
+
       @media (prefers-color-scheme: dark) {
         :root {
           background: #111;
@@ -82,12 +87,39 @@
   <body>
     <main>
       <h1>FVN Debattverktøy</h1>
-      <p>Auth-tjenesten er deployet. Neste steg er å sette miljøvariabler og teste Plan3-innlogging.</p>
+      <p>Auth-tjenesten er deployet. Logg inn med Plan3 for å teste redaksjonell tilgang.</p>
       <nav aria-label="Snarveier">
         <a href="/healthz">Health</a>
         <a href="/auth/login">Plan3-login</a>
         <a href="/api/me">API-test</a>
+        <a href="/api/auth/logout">Logg ut</a>
       </nav>
+      <p id="status">Sjekker innlogging...</p>
     </main>
+    <script>
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('token')) {
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.toString());
+      }
+
+      fetch('/api/me', { credentials: 'same-origin' })
+        .then(async (response) => {
+          if (!response.ok) return null;
+          return response.json();
+        })
+        .then((user) => {
+          const status = document.getElementById('status');
+          if (!user) {
+            status.textContent = 'Ikke innlogget.';
+            return;
+          }
+
+          status.textContent = `Innlogget som ${user.name || user.email || user.id}.`;
+        })
+        .catch(() => {
+          document.getElementById('status').textContent = 'Kunne ikke sjekke innlogging.';
+        });
+    </script>
   </body>
 </html>

@@ -2,6 +2,8 @@ const PLAN3_LOGIN_URL = process.env.PLAN3_LOGIN_URL || 'https://micro.fvn.no/pla
 const PLAN3_VERIFY_URL = process.env.PLAN3_VERIFY_URL || 'https://micro.fvn.no/plan3Auth/verify';
 const AUTH_VERIFY_TIMEOUT_MS = parsePositiveInt(process.env.AUTH_VERIFY_TIMEOUT_MS, 5000);
 const ALLOWED_REDIRECT_ORIGINS = parseList(process.env.ALLOWED_REDIRECT_ORIGINS);
+const PLAN3_COOKIE_NAME = 'fvn_plan3_token';
+const PLAN3_COOKIE_MAX_AGE_SECONDS = parsePositiveInt(process.env.PLAN3_COOKIE_MAX_AGE_SECONDS, 8 * 60 * 60);
 
 function parsePositiveInt(value, fallback) {
   const parsed = Number.parseInt(String(value || ''), 10);
@@ -65,6 +67,43 @@ function getBearerToken(request) {
   return match?.[1]?.trim() || null;
 }
 
+function getCookieValue(request, name) {
+  const cookies = String(request.headers.get('cookie') || '').split(';');
+
+  for (const cookie of cookies) {
+    const [rawName, ...rawValue] = cookie.trim().split('=');
+    if (rawName === name) {
+      return decodeURIComponent(rawValue.join('='));
+    }
+  }
+
+  return null;
+}
+
+function getAuthToken(request) {
+  return getBearerToken(request) || getCookieValue(request, PLAN3_COOKIE_NAME);
+}
+
+function buildAuthCookie(token, request) {
+  const origin = getRequestOrigin(request);
+  const secure = !origin || origin.startsWith('https:') ? '; Secure' : '';
+
+  return [
+    `${PLAN3_COOKIE_NAME}=${encodeURIComponent(token)}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${PLAN3_COOKIE_MAX_AGE_SECONDS}`,
+    secure.replace(/^; /, ''),
+  ]
+    .filter(Boolean)
+    .join('; ');
+}
+
+function buildLogoutCookie() {
+  return `${PLAN3_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0`;
+}
+
 function validateRedirectBackend(rawUrl) {
   if (!rawUrl) {
     return { ok: false, error: 'DEPLOYED_APP_URL must be set' };
@@ -102,15 +141,36 @@ function getRequestOrigin(request) {
   }
 }
 
+function getBackendUrl(request) {
+  const backendUrl = getRequestOrigin(request) || process.env.DEPLOYED_APP_URL;
+  return validateRedirectBackend(backendUrl);
+}
+
+function buildCallbackUrl(request) {
+  const backendUrl = getBackendUrl(request);
+  if (!backendUrl.ok) {
+    return backendUrl;
+  }
+
+  return {
+    ok: true,
+    url: new URL('/api/auth/callback', backendUrl.url).toString(),
+  };
+}
+
 function buildPlan3LoginUrl(request) {
-  const backendUrl = process.env.DEPLOYED_APP_URL || getRequestOrigin(request);
-  const redirectBackend = validateRedirectBackend(backendUrl);
+  const callbackUrl = buildCallbackUrl(request);
+  if (!callbackUrl.ok) {
+    return callbackUrl;
+  }
+
+  const redirectBackend = validateRedirectBackend(callbackUrl.url);
   if (!redirectBackend.ok) {
     return redirectBackend;
   }
 
   const url = new URL(PLAN3_LOGIN_URL);
-  url.searchParams.set('redirectBackend', redirectBackend.url);
+  url.searchParams.set('redirectBackend', callbackUrl.url);
   return { ok: true, url: url.toString() };
 }
 
@@ -184,7 +244,7 @@ async function requireUser(request) {
     };
   }
 
-  const token = getBearerToken(request);
+  const token = getAuthToken(request);
   if (!token) {
     return {
       response: json({ error: 'missing authorization' }, { status: 401 }),
@@ -225,8 +285,13 @@ async function requireUser(request) {
 }
 
 export {
+  buildAuthCookie,
+  buildLogoutCookie,
   buildPlan3LoginUrl,
+  extractVerifiedUser,
   json,
+  normalizeUser,
   requireUser,
   validateRedirectBackend,
+  verifyPlan3Token,
 };
