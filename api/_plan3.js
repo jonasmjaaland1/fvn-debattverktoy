@@ -206,19 +206,20 @@ function buildPlan3LoginUrl(request) {
 }
 
 function extractVerifiedUser(body = {}) {
+  const source = isPlainObject(body) ? body : {};
   const candidates = [
-    body.decoded,
-    body.payload,
-    body.claims,
-    body.token,
-    body.user,
-    body.data?.decoded,
-    body.data?.payload,
-    body.data?.claims,
-    body.data?.token,
-    body.data?.user,
-    body.data,
-    body,
+    source.decoded,
+    source.payload,
+    source.claims,
+    source.token,
+    source.user,
+    source.data?.decoded,
+    source.data?.payload,
+    source.data?.claims,
+    source.data?.token,
+    source.data?.user,
+    source.data,
+    source,
   ];
 
   return candidates.find(hasUserIdentity) || null;
