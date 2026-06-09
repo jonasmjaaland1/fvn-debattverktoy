@@ -14,6 +14,13 @@ Vercel Functions støtter Node.js-funksjoner direkte fra `/api`-mappen. Det pass
 - `GET /api/auth/logout` - tømmer innloggingscookie
 - `GET /api/me` - krever `Authorization: Bearer <token>`
 - `GET /api/auth/session` - krever `Authorization: Bearer <token>`
+- `GET /api/status` - viser innlogget bruker og om Supabase/Outlook er konfigurert
+- `GET /api/mail/latest` - forhåndsviser siste e-poster fra Outlook
+- `POST /api/mail/import` - importerer e-poster fra Outlook til Supabase
+- `GET /api/debate/list` - lister lagrede innlegg
+- `POST /api/debate/manual` - lagrer et manuelt testinnlegg
+- `POST /api/debate/evaluate` - kjører vurderingsmodellen på et innlegg
+- `POST /api/debate/update` - oppdaterer status/notater
 
 `/auth/login` og `/healthz` er rewrites i `vercel.json` til Vercel Functions under `/api`.
 
@@ -25,6 +32,23 @@ Legg inn disse under Project Settings -> Environment Variables:
 AUTH_VERIFY_TIMEOUT_MS=5000
 PLAN3_LOGIN_URL=https://micro.fvn.no/plan3Auth/login
 PLAN3_VERIFY_URL=https://micro.fvn.no/plan3Auth/verify
+```
+
+Supabase:
+
+```bash
+SUPABASE_URL=https://PROJECT_REF.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_xxx
+```
+
+Microsoft Graph/Outlook:
+
+```bash
+MS_TENANT_ID=...
+MS_CLIENT_ID=...
+MS_CLIENT_SECRET=...
+OUTLOOK_MAILBOX=debatt@example.no
+OUTLOOK_FOLDER=inbox
 ```
 
 Valgfritt, men anbefalt i production:
@@ -75,6 +99,19 @@ Supabase trengs ikke for selve Plan3-verifiseringen. Bruk Supabase når dere vil
 - koblinger til FVN-saker
 
 Velg europeisk region for Supabase-prosjektet, helst Frankfurt/Europe, siden dette er redaksjonelle data og brukerne er i Norge.
+
+Kjør SQL-filen `supabase/schema.sql` i Supabase SQL Editor før du setter appen i bruk.
+
+## Microsoft Graph
+
+Outlook-integrasjonen bruker Microsoft Graph med client credentials og read-only henting av meldinger:
+
+- app registration i Microsoft Entra
+- application permission for mail-lesing
+- admin consent
+- tilgang begrenset til debattpostkassen med Exchange Online RBAC for Applications
+
+Appen gjør ikke endringer i Outlook. Den henter meldinger og lagrer kopier/metadata i Supabase.
 
 ## Smoke-test
 

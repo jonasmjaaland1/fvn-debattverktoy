@@ -9,78 +9,301 @@
         color-scheme: light dark;
         font-family:
           Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #f7f7f4;
-        color: #171717;
+        background: #101112;
+        color: #f5f5f0;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
+        background: #101112;
       }
 
-      main {
-        width: min(680px, calc(100vw - 40px));
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button,
+      select,
+      input,
+      textarea {
+        border: 1px solid #3a3d3f;
+        border-radius: 8px;
+        background: #17191b;
+        color: #f5f5f0;
+      }
+
+      button,
+      select {
+        min-height: 40px;
+      }
+
+      button {
+        cursor: pointer;
+        font-weight: 700;
+        padding: 0 12px;
+      }
+
+      button:hover {
+        border-color: #e5e1d5;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      input,
+      textarea {
+        padding: 10px 12px;
+        width: 100%;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      header {
+        align-items: center;
+        border-bottom: 1px solid #2b2e30;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        min-height: 72px;
+        padding: 14px 24px;
+      }
+
+      .brand {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .brand img {
+        border-radius: 4px;
+        height: 32px;
+        object-fit: contain;
+        width: 32px;
       }
 
       h1 {
-        margin: 0 0 12px;
-        font-size: clamp(2rem, 5vw, 4rem);
-        line-height: 1;
+        font-size: 1.15rem;
         letter-spacing: 0;
+        margin: 0;
       }
 
-      p {
-        max-width: 52ch;
-        margin: 0 0 24px;
-        color: #555;
-        font-size: 1.05rem;
-        line-height: 1.5;
+      .muted {
+        color: #b7b7af;
       }
 
-      .actions {
+      .top-actions {
+        align-items: center;
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
+        justify-content: flex-end;
       }
 
-      a,
-      button {
-        appearance: none;
-        background: transparent;
-        border: 1px solid #c7c7c0;
-        border-radius: 8px;
-        color: inherit;
-        cursor: pointer;
-        display: inline-flex;
-        font: inherit;
-        font-weight: 650;
-        padding: 12px 14px;
-        text-decoration: none;
+      main {
+        display: grid;
+        gap: 0;
+        grid-template-columns: 360px minmax(0, 1fr);
+        min-height: calc(100vh - 72px);
       }
 
-      a:hover,
-      button:hover {
-        border-color: #171717;
+      aside {
+        border-right: 1px solid #2b2e30;
+        padding: 18px;
       }
 
-      #status {
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+        min-width: 0;
+      }
+
+      section {
+        min-width: 0;
+      }
+
+      .panel {
+        border-bottom: 1px solid #2b2e30;
+        padding: 18px;
+      }
+
+      aside .panel {
+        border: 0;
+        padding: 0 0 22px;
+      }
+
+      h2 {
         font-size: 0.95rem;
-        margin-top: 22px;
+        margin: 0 0 12px;
       }
 
-      #result {
-        border: 1px solid #d8d8d2;
+      .stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .row {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+      }
+
+      .row > * {
+        min-width: 0;
+      }
+
+      .status-grid {
+        display: grid;
+        gap: 8px;
+      }
+
+      .status-line {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .badge {
+        border: 1px solid #3a3d3f;
+        border-radius: 999px;
+        color: #d6d2c8;
+        font-size: 0.8rem;
+        padding: 4px 9px;
+        white-space: nowrap;
+      }
+
+      .badge.ok {
+        border-color: #4f8f66;
+        color: #91d6a9;
+      }
+
+      .badge.warn {
+        border-color: #9d7d3d;
+        color: #e7c16b;
+      }
+
+      .list {
+        border-right: 1px solid #2b2e30;
+        min-height: calc(100vh - 72px);
+      }
+
+      .list-toolbar {
+        align-items: center;
+        border-bottom: 1px solid #2b2e30;
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 14px 18px;
+      }
+
+      .items {
+        display: grid;
+      }
+
+      .item-row {
+        border: 0;
+        border-bottom: 1px solid #242729;
+        border-radius: 0;
+        display: grid;
+        gap: 5px;
+        justify-items: stretch;
+        min-height: 92px;
+        padding: 13px 18px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .item-row.active {
+        background: #202326;
+        border-left: 4px solid #d9b45d;
+      }
+
+      .item-title {
+        font-weight: 800;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .item-meta {
+        color: #b7b7af;
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        gap: 8px;
+      }
+
+      .detail {
+        min-height: calc(100vh - 72px);
+      }
+
+      .detail-header {
+        border-bottom: 1px solid #2b2e30;
+        padding: 18px;
+      }
+
+      .detail-title {
+        font-size: 1.25rem;
+        margin: 0 0 8px;
+      }
+
+      .detail-body {
+        display: grid;
+        gap: 18px;
+        padding: 18px;
+      }
+
+      .body-text {
+        background: #141618;
+        border: 1px solid #2b2e30;
         border-radius: 8px;
-        margin-top: 20px;
-        max-width: 100%;
-        padding: 16px;
+        line-height: 1.55;
+        max-height: 360px;
+        overflow: auto;
+        padding: 14px;
+        white-space: pre-wrap;
       }
 
-      #result h2 {
-        font-size: 1rem;
-        margin: 0 0 10px;
+      .score-grid {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      .score {
+        border: 1px solid #2b2e30;
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .score strong {
+        display: block;
+        font-size: 1.25rem;
+      }
+
+      .notice {
+        border: 1px solid #50442b;
+        border-radius: 8px;
+        color: #e7c16b;
+        padding: 12px;
+      }
+
+      .error {
+        color: #ff9b92;
       }
 
       pre {
@@ -90,111 +313,430 @@
         word-break: break-word;
       }
 
-      @media (prefers-color-scheme: dark) {
-        :root {
-          background: #111;
-          color: #f4f4f0;
+      @media (max-width: 980px) {
+        header {
+          align-items: flex-start;
+          flex-direction: column;
         }
 
-        p {
-          color: #bbb;
+        main,
+        .workspace {
+          grid-template-columns: 1fr;
         }
 
-        a,
-        button {
-          border-color: #444;
-        }
-
-        a:hover,
-        button:hover {
-          border-color: #f4f4f0;
-        }
-
-        #result {
-          border-color: #333;
+        aside,
+        .list {
+          border-right: 0;
         }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>FVN Debattverktøy</h1>
-      <p>Auth-tjenesten er deployet. Logg inn med Plan3 for å teste redaksjonell tilgang.</p>
-      <div class="actions" aria-label="Snarveier">
-        <button type="button" id="healthButton">Health</button>
-        <a href="/auth/login">Plan3-login</a>
-        <button type="button" id="meButton">API-test</button>
+    <header>
+      <div class="brand">
+        <img id="newsroomLogo" alt="" hidden />
+        <div>
+          <h1>FVN Debattverktøy</h1>
+          <div id="userLine" class="muted">Sjekker innlogging...</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="loginButton">Plan3-login</button>
         <button type="button" id="logoutButton">Logg ut</button>
       </div>
-      <p id="status">Sjekker innlogging...</p>
-      <section id="result" hidden>
-        <h2 id="resultTitle"></h2>
-        <pre id="resultBody"></pre>
-      </section>
+    </header>
+
+    <main>
+      <aside>
+        <section class="panel">
+          <h2>Status</h2>
+          <div class="status-grid">
+            <div class="status-line">
+              <span>Plan3</span>
+              <span id="plan3Status" class="badge warn">Sjekker</span>
+            </div>
+            <div class="status-line">
+              <span>Supabase</span>
+              <span id="supabaseStatus" class="badge warn">Ikke satt</span>
+            </div>
+            <div class="status-line">
+              <span>Outlook</span>
+              <span id="graphStatus" class="badge warn">Ikke satt</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Innhenting</h2>
+          <div class="stack">
+            <button type="button" id="importButton">Importer siste 25 fra Outlook</button>
+            <button type="button" id="previewMailButton">Forhåndsvis siste 10</button>
+            <button type="button" id="refreshButton">Oppdater liste</button>
+            <div id="sideMessage" class="muted"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Manuell test</h2>
+          <form id="manualForm" class="stack">
+            <input name="subject" placeholder="Tittel/emne" autocomplete="off" />
+            <input name="sender_name" placeholder="Avsendernavn" autocomplete="off" />
+            <input name="sender_email" placeholder="Avsender e-post" autocomplete="off" />
+            <textarea name="body_text" placeholder="Lim inn leserinnlegg"></textarea>
+            <button type="submit">Lagre manuelt innlegg</button>
+          </form>
+        </section>
+      </aside>
+
+      <div class="workspace">
+        <section class="list">
+          <div class="list-toolbar">
+            <div>
+              <strong>Innlegg</strong>
+              <span id="countLine" class="muted"></span>
+            </div>
+            <select id="statusFilter" aria-label="Statusfilter">
+              <option value="">Alle</option>
+              <option value="new">Nye</option>
+              <option value="candidate">Kandidater</option>
+              <option value="needs_edit">Trenger redigering</option>
+              <option value="manual_review">Manuell vurdering</option>
+              <option value="hold">Vent</option>
+              <option value="rejected">Avvist</option>
+              <option value="published">Publisert</option>
+            </select>
+          </div>
+          <div id="items" class="items"></div>
+        </section>
+
+        <section class="detail">
+          <div class="detail-header">
+            <h2 id="detailTitle" class="detail-title">Velg et innlegg</h2>
+            <div id="detailMeta" class="muted">Importer fra Outlook eller legg inn en manuell test.</div>
+          </div>
+          <div id="detailBody" class="detail-body"></div>
+        </section>
+      </div>
     </main>
+
     <script>
-      const status = document.getElementById('status');
-      const result = document.getElementById('result');
-      const resultTitle = document.getElementById('resultTitle');
-      const resultBody = document.getElementById('resultBody');
+      const state = {
+        items: [],
+        selectedId: null,
+        user: null,
+      };
 
-      const url = new URL(window.location.href);
-      if (url.searchParams.has('token')) {
-        url.searchParams.delete('token');
-        window.history.replaceState({}, document.title, url.toString());
+      const els = {
+        countLine: document.getElementById('countLine'),
+        detailBody: document.getElementById('detailBody'),
+        detailMeta: document.getElementById('detailMeta'),
+        detailTitle: document.getElementById('detailTitle'),
+        graphStatus: document.getElementById('graphStatus'),
+        items: document.getElementById('items'),
+        newsroomLogo: document.getElementById('newsroomLogo'),
+        plan3Status: document.getElementById('plan3Status'),
+        sideMessage: document.getElementById('sideMessage'),
+        statusFilter: document.getElementById('statusFilter'),
+        supabaseStatus: document.getElementById('supabaseStatus'),
+        userLine: document.getElementById('userLine'),
+      };
+
+      function setBadge(element, ok, text) {
+        element.className = `badge ${ok ? 'ok' : 'warn'}`;
+        element.textContent = text;
       }
 
-      function showResult(title, value) {
-        resultTitle.textContent = title;
-        resultBody.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-        result.hidden = false;
+      function setSideMessage(message, isError = false) {
+        els.sideMessage.className = isError ? 'error' : 'muted';
+        els.sideMessage.textContent = message;
       }
 
-      async function fetchJson(path) {
-        const response = await fetch(path, { credentials: 'same-origin' });
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+          },
+          ...options,
+        });
         const text = await response.text();
         const body = text ? JSON.parse(text) : null;
-        return { ok: response.ok, status: response.status, body };
+        if (!response.ok) {
+          const error = new Error(body?.detail || body?.error || `HTTP ${response.status}`);
+          error.status = response.status;
+          error.body = body;
+          throw error;
+        }
+        return body;
       }
 
-      async function checkSession(showDetails = false) {
+      function formatDate(value) {
+        if (!value) return 'Ukjent tid';
+        return new Intl.DateTimeFormat('nb-NO', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        }).format(new Date(value));
+      }
+
+      function statusLabel(status) {
+        return (
+          {
+            candidate: 'Kandidat',
+            hold: 'Vent',
+            manual_review: 'Manuell vurdering',
+            needs_edit: 'Trenger redigering',
+            new: 'Ny',
+            published: 'Publisert',
+            rejected: 'Avvist',
+          }[status] || status || 'Ukjent'
+        );
+      }
+
+      async function loadStatus() {
         try {
-          const response = await fetchJson('/api/me');
-          if (!response.ok) {
-            status.textContent = 'Ikke innlogget.';
-            if (showDetails) showResult('API-test', response.body || `HTTP ${response.status}`);
-            return null;
+          const payload = await api('/api/status');
+          state.user = payload.user;
+          els.userLine.textContent = `Innlogget som ${payload.user.name || payload.user.email}`;
+          setBadge(els.plan3Status, true, 'OK');
+          setBadge(els.supabaseStatus, payload.config.supabase.configured, payload.config.supabase.configured ? 'OK' : 'Mangler env');
+          setBadge(els.graphStatus, payload.config.graph.configured, payload.config.graph.configured ? payload.config.graph.mailbox : 'Mangler env');
+
+          if (payload.user.newsroom?.logo) {
+            els.newsroomLogo.src = payload.user.newsroom.logo;
+            els.newsroomLogo.hidden = false;
           }
-
-          const user = response.body;
-          status.textContent = `Innlogget som ${user.name || user.email || user.id}.`;
-          if (showDetails) showResult('API-test', response.body);
-          return response.body;
-        } catch {
-          status.textContent = 'Kunne ikke sjekke innlogging.';
-          if (showDetails) showResult('API-test', 'Kunne ikke hente brukerdata.');
-          return null;
+        } catch (err) {
+          els.userLine.textContent = 'Ikke innlogget.';
+          setBadge(els.plan3Status, false, 'Ikke innlogget');
+          setSideMessage('Logg inn med Plan3 for å bruke verktøyet.', true);
         }
       }
 
-      document.getElementById('healthButton').addEventListener('click', async () => {
-        try {
-          const response = await fetchJson('/healthz');
-          showResult('Health', response.body || `HTTP ${response.status}`);
-        } catch {
-          showResult('Health', 'Health-sjekk feilet.');
-        }
-      });
+      function renderItems() {
+        els.items.textContent = '';
+        els.countLine.textContent = `(${state.items.length})`;
 
-      document.getElementById('meButton').addEventListener('click', () => {
-        checkSession(true);
+        if (!state.items.length) {
+          const empty = document.createElement('div');
+          empty.className = 'panel muted';
+          empty.textContent = 'Ingen innlegg å vise ennå.';
+          els.items.append(empty);
+          return;
+        }
+
+        for (const item of state.items) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `item-row ${item.id === state.selectedId ? 'active' : ''}`;
+          button.addEventListener('click', () => selectItem(item.id));
+
+          const title = document.createElement('div');
+          title.className = 'item-title';
+          title.textContent = item.subject || '(uten emne)';
+
+          const meta = document.createElement('div');
+          meta.className = 'item-meta';
+          meta.textContent = `${statusLabel(item.status)} · ${item.sender_name || item.sender_email || 'Ukjent avsender'} · ${formatDate(item.received_at)}`;
+
+          const preview = document.createElement('div');
+          preview.className = 'muted';
+          preview.textContent = item.body_preview || '';
+
+          button.append(title, meta, preview);
+          els.items.append(button);
+        }
+      }
+
+      function renderScoreGrid(item) {
+        const scores = item.scores || {};
+        const labels = {
+          aktualitet: 'Aktualitet',
+          fvn_kobling: 'FVN-kobling',
+          flere_sider: 'Flere sider',
+          lokal_regional: 'Lokal/regional',
+          mix: 'Mix',
+          relevans: 'Relevans',
+          sprak_personlig: 'Språk/stemme',
+        };
+
+        const grid = document.createElement('div');
+        grid.className = 'score-grid';
+
+        for (const [key, label] of Object.entries(labels)) {
+          const box = document.createElement('div');
+          box.className = 'score';
+          const score = document.createElement('strong');
+          score.textContent = scores[key] ?? '-';
+          const caption = document.createElement('span');
+          caption.className = 'muted';
+          caption.textContent = label;
+          box.append(score, caption);
+          grid.append(box);
+        }
+
+        return grid;
+      }
+
+      function selectItem(id) {
+        state.selectedId = id;
+        renderItems();
+
+        const item = state.items.find((candidate) => candidate.id === id);
+        if (!item) return;
+
+        els.detailTitle.textContent = item.subject || '(uten emne)';
+        els.detailMeta.textContent = `${item.sender_name || 'Ukjent avsender'} · ${item.sender_email || 'ukjent e-post'} · ${formatDate(item.received_at)}`;
+        els.detailBody.textContent = '';
+
+        const actions = document.createElement('div');
+        actions.className = 'row';
+
+        const evaluateButton = document.createElement('button');
+        evaluateButton.type = 'button';
+        evaluateButton.textContent = 'Kjør vurdering';
+        evaluateButton.addEventListener('click', () => evaluateSelected());
+
+        const statusSelect = document.createElement('select');
+        for (const value of ['new', 'candidate', 'needs_edit', 'manual_review', 'hold', 'rejected', 'published']) {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = statusLabel(value);
+          option.selected = item.status === value;
+          statusSelect.append(option);
+        }
+
+        const saveStatusButton = document.createElement('button');
+        saveStatusButton.type = 'button';
+        saveStatusButton.textContent = 'Lagre status';
+        saveStatusButton.addEventListener('click', () => updateSelected({ status: statusSelect.value }));
+
+        actions.append(evaluateButton, statusSelect, saveStatusButton);
+
+        const note = document.createElement('div');
+        note.className = item.risk_flags?.length ? 'notice' : 'muted';
+        note.textContent = item.editor_note || 'Ingen vurdering kjørt ennå.';
+
+        const body = document.createElement('div');
+        body.className = 'body-text';
+        body.textContent = item.body_text || item.body_preview || 'Ingen tekst hentet.';
+
+        els.detailBody.append(actions, renderScoreGrid(item), note);
+
+        if (item.risk_flags?.length) {
+          const risks = document.createElement('div');
+          risks.className = 'notice';
+          risks.textContent = `Risikoflagg: ${item.risk_flags.join(', ')}`;
+          els.detailBody.append(risks);
+        }
+
+        els.detailBody.append(body);
+      }
+
+      async function loadItems() {
+        try {
+          const status = els.statusFilter.value;
+          const payload = await api(`/api/debate/list?limit=50${status ? `&status=${encodeURIComponent(status)}` : ''}`);
+          state.items = payload.items || [];
+          if (!state.selectedId && state.items[0]) state.selectedId = state.items[0].id;
+          renderItems();
+          if (state.selectedId) selectItem(state.selectedId);
+        } catch (err) {
+          state.items = [];
+          renderItems();
+          setSideMessage(err.body?.error === 'supabase_not_configured' ? 'Supabase mangler env-variabler.' : err.message, true);
+        }
+      }
+
+      async function importMail() {
+        setSideMessage('Importerer fra Outlook...');
+        try {
+          const payload = await api('/api/mail/import?top=25', { method: 'POST' });
+          setSideMessage(`Importerte/oppdaterte ${payload.count} innlegg.`);
+          await loadItems();
+        } catch (err) {
+          setSideMessage(err.body?.error === 'graph_not_configured' ? 'Outlook/Microsoft Graph mangler env-variabler.' : err.message, true);
+        }
+      }
+
+      async function previewMail() {
+        setSideMessage('Henter forhåndsvisning...');
+        try {
+          const payload = await api('/api/mail/latest?top=10');
+          setSideMessage(`Fant ${payload.count} e-poster i Outlook. Importer for å lagre dem.`);
+        } catch (err) {
+          setSideMessage(err.body?.error === 'graph_not_configured' ? 'Outlook/Microsoft Graph mangler env-variabler.' : err.message, true);
+        }
+      }
+
+      async function evaluateSelected() {
+        if (!state.selectedId) return;
+        setSideMessage('Kjører vurdering...');
+        try {
+          const payload = await api('/api/debate/evaluate', {
+            body: JSON.stringify({ id: state.selectedId }),
+            method: 'POST',
+          });
+          const index = state.items.findIndex((item) => item.id === state.selectedId);
+          if (index >= 0) state.items[index] = payload.item;
+          setSideMessage('Vurdering lagret.');
+          selectItem(state.selectedId);
+        } catch (err) {
+          setSideMessage(err.message, true);
+        }
+      }
+
+      async function updateSelected(patch) {
+        if (!state.selectedId) return;
+        try {
+          const payload = await api('/api/debate/update', {
+            body: JSON.stringify({ id: state.selectedId, patch }),
+            method: 'POST',
+          });
+          const index = state.items.findIndex((item) => item.id === state.selectedId);
+          if (index >= 0) state.items[index] = payload.item;
+          setSideMessage('Status lagret.');
+          selectItem(state.selectedId);
+        } catch (err) {
+          setSideMessage(err.message, true);
+        }
+      }
+
+      document.getElementById('loginButton').addEventListener('click', () => {
+        window.location.assign('/auth/login');
       });
 
       document.getElementById('logoutButton').addEventListener('click', () => {
         window.location.assign('/api/auth/logout');
       });
 
-      checkSession();
+      document.getElementById('refreshButton').addEventListener('click', loadItems);
+      document.getElementById('importButton').addEventListener('click', importMail);
+      document.getElementById('previewMailButton').addEventListener('click', previewMail);
+      els.statusFilter.addEventListener('change', () => {
+        state.selectedId = null;
+        loadItems();
+      });
+
+      document.getElementById('manualForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        setSideMessage('Lagrer manuelt innlegg...');
+        try {
+          const payload = await api('/api/debate/manual', {
+            body: JSON.stringify(Object.fromEntries(form.entries())),
+            method: 'POST',
+          });
+          event.currentTarget.reset();
+          state.selectedId = payload.item.id;
+          setSideMessage('Manuelt innlegg lagret.');
+          await loadItems();
+        } catch (err) {
+          setSideMessage(err.body?.error === 'supabase_not_configured' ? 'Supabase mangler env-variabler.' : err.message, true);
+        }
+      });
+
+      loadStatus().then(loadItems);
     </script>
   </body>
 </html>
