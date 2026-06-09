@@ -92,8 +92,19 @@ function validateRedirectBackend(rawUrl) {
   return { ok: true, url: parsed.toString() };
 }
 
-function buildPlan3LoginUrl() {
-  const redirectBackend = validateRedirectBackend(process.env.DEPLOYED_APP_URL);
+function getRequestOrigin(request) {
+  if (!request?.url) return null;
+
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return null;
+  }
+}
+
+function buildPlan3LoginUrl(request) {
+  const backendUrl = process.env.DEPLOYED_APP_URL || getRequestOrigin(request);
+  const redirectBackend = validateRedirectBackend(backendUrl);
   if (!redirectBackend.ok) {
     return redirectBackend;
   }

@@ -20,14 +20,19 @@ Vercel Functions støtter Node.js-funksjoner direkte fra `/api`-mappen. Det pass
 Legg inn disse under Project Settings -> Environment Variables:
 
 ```bash
-DEPLOYED_APP_URL=https://debattverktoy.dittdomene.no
-ALLOWED_REDIRECT_ORIGINS=https://debattverktoy.dittdomene.no
 AUTH_VERIFY_TIMEOUT_MS=5000
 PLAN3_LOGIN_URL=https://micro.fvn.no/plan3Auth/login
 PLAN3_VERIFY_URL=https://micro.fvn.no/plan3Auth/verify
 ```
 
-For staging/preview kan `DEPLOYED_APP_URL` og `ALLOWED_REDIRECT_ORIGINS` settes til staging-URL-en.
+Valgfritt, men anbefalt i production:
+
+```bash
+DEPLOYED_APP_URL=https://debattverktoy.dittdomene.no
+ALLOWED_REDIRECT_ORIGINS=https://debattverktoy.dittdomene.no
+```
+
+Hvis `DEPLOYED_APP_URL` ikke er satt, bruker `/auth/login` URL-en requesten kom inn på som `redirectBackend`. Det gjør preview-testing på Vercel enklere.
 
 ## Deploy
 
@@ -103,4 +108,3 @@ curl -i https://debattverktoy.dittdomene.no/api/me \
 ```
 
 Forventet: `200` med begrenset brukerinfo.
-
