@@ -58,6 +58,24 @@ function isPlainObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+function hasUserIdentity(value) {
+  if (!isPlainObject(value)) return false;
+
+  const emailFromArray = Array.isArray(value.userEmails) ? value.userEmails[0] : null;
+  return Boolean(
+    firstString(
+      value.userId,
+      value.id,
+      value.sub,
+      emailFromArray,
+      value.email,
+      value.mail,
+      value.upn,
+      value.preferred_username,
+    ),
+  );
+}
+
 function firstString(...values) {
   return values.find((value) => typeof value === 'string' && value.trim())?.trim() || null;
 }
@@ -203,7 +221,7 @@ function extractVerifiedUser(body = {}) {
     body,
   ];
 
-  return candidates.find(isPlainObject) || null;
+  return candidates.find(hasUserIdentity) || null;
 }
 
 function getVerifiedUser(verifyBody, token) {
