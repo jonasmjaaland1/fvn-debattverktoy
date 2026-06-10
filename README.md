@@ -17,6 +17,8 @@ Vercel Functions støtter Node.js-funksjoner direkte fra `/api`-mappen. Det pass
 - `GET /api/status` - viser innlogget bruker og om Supabase/Outlook er konfigurert
 - `GET /api/mail/latest` - forhåndsviser siste e-poster fra Outlook
 - `POST /api/mail/import` - importerer e-poster fra Outlook til Supabase
+- `POST /api/fvn/import` - henter ferske FVN-saker fra RSS/sitemap til Supabase
+- `GET /api/fvn/latest` - viser lagrede FVN-saker
 - `GET /api/debate/list` - lister lagrede innlegg
 - `POST /api/debate/manual` - lagrer et manuelt testinnlegg
 - `POST /api/debate/evaluate` - kjører vurderingsmodellen på et innlegg
@@ -112,6 +114,21 @@ Outlook-integrasjonen bruker Microsoft Graph med client credentials og read-only
 - tilgang begrenset til debattpostkassen med Exchange Online RBAC for Applications
 
 Appen gjør ikke endringer i Outlook. Den henter meldinger og lagrer kopier/metadata i Supabase.
+
+## FVN-saker
+
+Appen kan hente ferske FVN-saker automatisk. Den bruker FVNs RSS og sitemaps til å finne saker, og forsøker deretter å hente artikkelsiden for tittel, ingress og brødtekst. Sakene lagres i `fvn_recent_stories`, og vurderingsmodellen bruker dem til å score `FVN-kobling`.
+
+I webgrensesnittet: klikk `Hent FVN-saker siste 14 dager` før du kjører vurdering av innlegg.
+
+API:
+
+```bash
+POST /api/fvn/import?days=14&limit=120
+GET /api/fvn/latest?limit=20
+```
+
+`limit` er hvor mange ferske kandidater som sjekkes i én kjøring. Bruk lavere tall for rask test og høyere tall for bredere dekning.
 
 ## Smoke-test
 

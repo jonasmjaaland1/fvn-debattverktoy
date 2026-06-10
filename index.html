@@ -302,6 +302,38 @@
         padding: 12px;
       }
 
+      .story-list {
+        border-top: 1px solid #2b2e30;
+        display: grid;
+        gap: 10px;
+        margin-top: 4px;
+        padding-top: 12px;
+      }
+
+      .story-row {
+        border: 1px solid #2b2e30;
+        border-radius: 8px;
+        color: inherit;
+        display: grid;
+        gap: 4px;
+        padding: 10px;
+        text-decoration: none;
+      }
+
+      .story-row:hover {
+        border-color: #e5e1d5;
+      }
+
+      .story-title {
+        font-weight: 750;
+        line-height: 1.25;
+      }
+
+      .story-meta {
+        color: #b7b7af;
+        font-size: 0.82rem;
+      }
+
       .error {
         color: #ff9b92;
       }
@@ -363,6 +395,10 @@
               <span>Outlook</span>
               <span id="graphStatus" class="badge warn">Ikke satt</span>
             </div>
+            <div class="status-line">
+              <span>FVN-saker</span>
+              <span id="fvnStatus" class="badge warn">Ikke hentet</span>
+            </div>
           </div>
         </section>
 
@@ -371,8 +407,10 @@
           <div class="stack">
             <button type="button" id="importButton">Importer siste 25 fra Outlook</button>
             <button type="button" id="previewMailButton">Forhåndsvis siste 10</button>
+            <button type="button" id="importFvnButton">Hent FVN-saker siste 14 dager</button>
             <button type="button" id="refreshButton">Oppdater liste</button>
             <div id="sideMessage" class="muted"></div>
+            <div id="fvnStories" class="story-list"></div>
           </div>
         </section>
 
@@ -423,6 +461,7 @@
       const state = {
         items: [],
         selectedId: null,
+        stories: [],
         user: null,
       };
 
@@ -431,6 +470,8 @@
         detailBody: document.getElementById('detailBody'),
         detailMeta: document.getElementById('detailMeta'),
         detailTitle: document.getElementById('detailTitle'),
+        fvnStatus: document.getElementById('fvnStatus'),
+        fvnStories: document.getElementById('fvnStories'),
         graphStatus: document.getElementById('graphStatus'),
         items: document.getElementById('items'),
         newsroomLogo: document.getElementById('newsroomLogo'),
@@ -511,6 +552,7 @@
           setBadge(els.plan3Status, true, 'OK');
           setBadge(els.supabaseStatus, payload.config.supabase.configured, payload.config.supabase.configured ? 'OK' : 'Mangler env');
           setBadge(els.graphStatus, payload.config.graph.configured, payload.config.graph.configured ? payload.config.graph.mailbox : 'Mangler env');
+          setBadge(els.fvnStatus, true, 'Klar');
 
           if (payload.user.newsroom?.logo) {
             els.newsroomLogo.src = payload.user.newsroom.logo;
@@ -519,7 +561,53 @@
         } catch (err) {
           els.userLine.textContent = 'Ikke innlogget.';
           setBadge(els.plan3Status, false, 'Ikke innlogget');
+          setBadge(els.fvnStatus, false, 'Ikke innlogget');
           setSideMessage('Logg inn med Plan3 for å bruke verktøyet.', true);
+        }
+      }
+
+      function renderFvnStories() {
+        els.fvnStories.textContent = '';
+
+        if (!state.stories.length) {
+          const empty = document.createElement('div');
+          empty.className = 'muted';
+          empty.textContent = 'Ingen FVN-saker hentet ennå.';
+          els.fvnStories.append(empty);
+          setBadge(els.fvnStatus, true, '0 saker');
+          return;
+        }
+
+        setBadge(els.fvnStatus, true, `${state.stories.length} saker`);
+        for (const story of state.stories.slice(0, 6)) {
+          const link = document.createElement('a');
+          link.className = 'story-row';
+          link.href = story.url;
+          link.target = '_blank';
+          link.rel = 'noreferrer';
+
+          const title = document.createElement('div');
+          title.className = 'story-title';
+          title.textContent = story.title || '(uten tittel)';
+
+          const meta = document.createElement('div');
+          meta.className = 'story-meta';
+          meta.textContent = `${story.section || 'FVN'} · ${formatDate(story.published_at)}`;
+
+          link.append(title, meta);
+          els.fvnStories.append(link);
+        }
+      }
+
+      async function loadFvnStories() {
+        try {
+          const payload = await api('/api/fvn/latest?limit=20');
+          state.stories = payload.items || [];
+          renderFvnStories();
+        } catch (err) {
+          state.stories = [];
+          renderFvnStories();
+          setBadge(els.fvnStatus, false, 'Feil');
         }
       }
 
@@ -627,11 +715,17 @@
         note.className = item.risk_flags?.length ? 'notice' : 'muted';
         note.textContent = item.editor_note || 'Ingen vurdering kjørt ennå.';
 
+        const fvnConnection = document.createElement('div');
+        fvnConnection.className = item.fvn_connection ? 'notice' : 'muted';
+        fvnConnection.textContent = item.fvn_connection
+          ? `FVN-kobling: ${item.fvn_connection}`
+          : 'Ingen FVN-kobling registrert ennå.';
+
         const body = document.createElement('div');
         body.className = 'body-text';
         body.textContent = item.body_text || item.body_preview || 'Ingen tekst hentet.';
 
-        els.detailBody.append(actions, renderScoreGrid(item), note);
+        els.detailBody.append(actions, renderScoreGrid(item), note, fvnConnection);
 
         if (item.risk_flags?.length) {
           const risks = document.createElement('div');
@@ -674,6 +768,17 @@
         try {
           const payload = await api('/api/mail/latest?top=10');
           setSideMessage(`Fant ${payload.count} e-poster i Outlook. Importer for å lagre dem.`);
+        } catch (err) {
+          setSideMessage(friendlyError(err), true);
+        }
+      }
+
+      async function importFvnStories() {
+        setSideMessage('Henter FVN-saker...');
+        try {
+          const payload = await api('/api/fvn/import?days=14&limit=120', { method: 'POST' });
+          setSideMessage(`Hentet ${payload.count} FVN-saker. Sjekket ${payload.checked} av ${payload.candidates}.`);
+          await loadFvnStories();
         } catch (err) {
           setSideMessage(friendlyError(err), true);
         }
@@ -722,6 +827,7 @@
 
       document.getElementById('refreshButton').addEventListener('click', loadItems);
       document.getElementById('importButton').addEventListener('click', importMail);
+      document.getElementById('importFvnButton').addEventListener('click', importFvnStories);
       document.getElementById('previewMailButton').addEventListener('click', previewMail);
       els.statusFilter.addEventListener('change', () => {
         state.selectedId = null;
@@ -747,7 +853,7 @@
         }
       });
 
-      loadStatus().then(loadItems);
+      loadStatus().then(() => Promise.all([loadItems(), loadFvnStories()]));
     </script>
   </body>
 </html>

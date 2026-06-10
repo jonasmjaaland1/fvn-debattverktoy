@@ -167,6 +167,22 @@ async function listRecentStories({ limit = 30 } = {}) {
   });
 }
 
+async function upsertRecentStories(stories) {
+  if (!stories.length) return [];
+
+  return supabaseRequest('fvn_recent_stories', {
+    method: 'POST',
+    searchParams: {
+      on_conflict: 'url',
+      select: '*',
+    },
+    headers: {
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: stories,
+  });
+}
+
 export {
   addEditorEvent,
   getDebateItem,
@@ -175,5 +191,6 @@ export {
   listRecentStories,
   missingSupabaseResponse,
   updateDebateItem,
+  upsertRecentStories,
   upsertDebateItems,
 };

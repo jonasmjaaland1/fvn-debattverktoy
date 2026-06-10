@@ -93,11 +93,18 @@ function storyMatches(item, stories = []) {
 
   return stories
     .map((story) => {
-      const titleWords = String(story.title || '')
+      const storyText = [
+        story.title,
+        story.ingress,
+        story.section,
+        ...(story.tags || []),
+        story.raw?.body_text,
+      ].filter(Boolean).join(' ');
+      const titleWords = String(storyText || '')
         .toLowerCase()
         .split(/[^a-zæøå0-9]+/i)
-        .filter((word) => word.length >= 5);
-      const hits = titleWords.filter((word) => text.includes(word));
+        .filter((word) => word.length >= 5 && !['dette', 'eller', 'etter', 'ingen', 'siste', 'viser'].includes(word));
+      const hits = [...new Set(titleWords.filter((word) => text.includes(word)))];
       return { story, hits };
     })
     .filter((match) => match.hits.length >= 2)
@@ -146,7 +153,7 @@ function evaluateDebateItem(item, stories = []) {
         ? `Lokal/regional kobling: ${local.hits.slice(0, 4).join(', ')}.`
         : 'Lokal/regional kobling er foreløpig svak og bør vurderes av redaktør.',
       matches.length
-        ? `Mulig kobling til nylig FVN-stoff: ${matches.map((match) => match.story.title).join(' / ')}.`
+        ? `Mulig kobling til nylig FVN-stoff: ${matches.map((match) => `${match.story.title} (${match.hits.slice(0, 3).join(', ')})`).join(' / ')}.`
         : 'Ingen tydelig maskinell kobling til registrerte FVN-saker ennå.',
     ].join(' '),
     fvn_connection: matches.length ? matches.map((match) => match.story.title).join(' / ') : null,
