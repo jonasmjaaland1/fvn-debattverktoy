@@ -440,13 +440,14 @@
       .score-grid {
         display: grid;
         gap: 8px;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
       }
 
       .score {
         border: 1px solid #2b2e30;
         border-radius: 8px;
-        padding: 10px;
+        min-width: 0;
+        padding: 9px;
       }
 
       .score strong {
@@ -675,8 +676,8 @@
           <div class="top-overview">
             <div class="overview-header">
               <div>
-                <strong>Beste vurderte</strong>
-                <div class="muted">Rangert etter samlet vurderingsscore</div>
+                <strong>Prioritert kø</strong>
+                <div class="muted">Kandidater og innlegg som bør vurderes først</div>
               </div>
               <button type="button" id="refreshTopButton">Oppdater</button>
             </div>
