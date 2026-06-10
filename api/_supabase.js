@@ -99,14 +99,36 @@ async function listDebateItems({ limit = 50, status } = {}) {
 }
 
 async function listTopDebateItems({ limit = 10 } = {}) {
-  return supabaseRequest('debate_items', {
+  const rows = await supabaseRequest('debate_items', {
     searchParams: {
       select: '*',
       order: 'priority.desc,received_at.desc.nullslast,updated_at.desc',
-      limit,
+      limit: Math.max(Number(limit) * 4, 50),
       priority: 'gt.0',
     },
   });
+
+  const statusRank = {
+    candidate: 5,
+    needs_edit: 4,
+    manual_review: 3,
+    hold: 2,
+    new: 1,
+    published: 1,
+    rejected: 0,
+  };
+
+  return rows
+    .sort((a, b) => {
+      const rankDiff = (statusRank[b.status] || 0) - (statusRank[a.status] || 0);
+      if (rankDiff) return rankDiff;
+
+      const scoreDiff = (b.priority || 0) - (a.priority || 0);
+      if (scoreDiff) return scoreDiff;
+
+      return new Date(b.received_at || 0) - new Date(a.received_at || 0);
+    })
+    .slice(0, Number(limit));
 }
 
 async function getDebateItem(id) {

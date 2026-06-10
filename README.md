@@ -139,7 +139,7 @@ Vurderingen er laget for å være en redaksjonell førsteutsiling, ikke en publi
 - Tekster uten tydelig lokal/regional forankring skal normalt ikke bli kandidat selv om de er velskrevne.
 - Tekster som er for korte, svært lange, har vedlegg, mangler avsender-e-post eller inneholder mulige personangrep/udokumenterte beskyldninger flagges til manuell vurdering.
 - Vurderingen forsøker å fjerne sitert e-posttråd, videresendingshoder og redaksjonelle svar før scoring.
-- Ved lik score sorteres topplisten etter faktisk mottakstidspunkt (`received_at`), ikke etter når vi importerte eller vurderte teksten.
+- Topplisten prioriterer først redaksjonell status (`Kandidat`, deretter `Trenger redigering`), så score og faktisk mottakstidspunkt (`received_at`).
 
 Scoringen bygger på kriteriene aktualitet, FVN-kobling, flere sider av saken, lokal/regional relevans, miks/stemme, offentlig relevans og språk/personlig stemme.
 
