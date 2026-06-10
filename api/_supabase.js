@@ -98,6 +98,17 @@ async function listDebateItems({ limit = 50, status } = {}) {
   });
 }
 
+async function listTopDebateItems({ limit = 10 } = {}) {
+  return supabaseRequest('debate_items', {
+    searchParams: {
+      select: '*',
+      order: 'priority.desc,updated_at.desc',
+      limit,
+      priority: 'gt.0',
+    },
+  });
+}
+
 async function getDebateItem(id) {
   const rows = await supabaseRequest('debate_items', {
     searchParams: {
@@ -189,6 +200,7 @@ export {
   getSupabaseConfig,
   listDebateItems,
   listRecentStories,
+  listTopDebateItems,
   missingSupabaseResponse,
   updateDebateItem,
   upsertRecentStories,

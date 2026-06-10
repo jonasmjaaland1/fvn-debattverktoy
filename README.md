@@ -22,6 +22,7 @@ Vercel Functions støtter Node.js-funksjoner direkte fra `/api`-mappen. Det pass
 - `GET /api/debate/list` - lister lagrede innlegg
 - `POST /api/debate/manual` - lagrer et manuelt testinnlegg
 - `POST /api/debate/evaluate` - kjører vurderingsmodellen på et innlegg
+- `GET /api/debate/top` - viser høyest vurderte innlegg sortert etter score
 - `POST /api/debate/update` - oppdaterer status/notater
 
 `/auth/login` og `/healthz` er rewrites i `vercel.json` til Vercel Functions under `/api`.

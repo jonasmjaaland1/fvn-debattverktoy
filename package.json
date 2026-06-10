@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check api/_evaluation.js && node --check api/_fvn.js && node --check api/_graph.js && node --check api/_plan3.js && node --check api/_supabase.js && node --check api/auth/callback.js && node --check api/auth/login.js && node --check api/auth/logout.js && node --check api/auth/session.js && node --check api/debate/evaluate.js && node --check api/debate/list.js && node --check api/debate/manual.js && node --check api/debate/update.js && node --check api/fvn/import.js && node --check api/fvn/latest.js && node --check api/healthz.js && node --check api/mail/import.js && node --check api/mail/latest.js && node --check api/me.js && node --check api/status.js"
+    "check": "node --check api/_evaluation.js && node --check api/_fvn.js && node --check api/_graph.js && node --check api/_plan3.js && node --check api/_supabase.js && node --check api/auth/callback.js && node --check api/auth/login.js && node --check api/auth/logout.js && node --check api/auth/session.js && node --check api/debate/evaluate.js && node --check api/debate/list.js && node --check api/debate/manual.js && node --check api/debate/top.js && node --check api/debate/update.js && node --check api/fvn/import.js && node --check api/fvn/latest.js && node --check api/healthz.js && node --check api/mail/import.js && node --check api/mail/latest.js && node --check api/me.js && node --check api/status.js"
   },
   "engines": {
     "node": ">=20"

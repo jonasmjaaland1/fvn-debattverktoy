@@ -334,6 +334,36 @@
         font-size: 0.82rem;
       }
 
+      .top-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .top-row {
+        border: 1px solid #2b2e30;
+        border-radius: 8px;
+        display: grid;
+        gap: 6px;
+        padding: 10px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .top-row.active {
+        background: #202326;
+        border-color: #d9b45d;
+      }
+
+      .top-title {
+        font-weight: 800;
+        line-height: 1.25;
+      }
+
+      .top-meta {
+        color: #b7b7af;
+        font-size: 0.82rem;
+      }
+
       .error {
         color: #ff9b92;
       }
@@ -424,6 +454,11 @@
             <button type="submit">Lagre manuelt innlegg</button>
           </form>
         </section>
+
+        <section class="panel">
+          <h2>Beste vurderte</h2>
+          <div id="topItems" class="top-list"></div>
+        </section>
       </aside>
 
       <div class="workspace">
@@ -462,6 +497,7 @@
         items: [],
         selectedId: null,
         stories: [],
+        topItems: [],
         user: null,
       };
 
@@ -479,6 +515,7 @@
         sideMessage: document.getElementById('sideMessage'),
         statusFilter: document.getElementById('statusFilter'),
         supabaseStatus: document.getElementById('supabaseStatus'),
+        topItems: document.getElementById('topItems'),
         userLine: document.getElementById('userLine'),
       };
 
@@ -646,6 +683,40 @@
         }
       }
 
+      function renderTopItems() {
+        els.topItems.textContent = '';
+
+        if (!state.topItems.length) {
+          const empty = document.createElement('div');
+          empty.className = 'muted';
+          empty.textContent = 'Ingen vurderte innlegg ennå.';
+          els.topItems.append(empty);
+          return;
+        }
+
+        for (const [index, item] of state.topItems.entries()) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `top-row ${item.id === state.selectedId ? 'active' : ''}`;
+          button.addEventListener('click', () => selectItem(item.id));
+
+          const title = document.createElement('div');
+          title.className = 'top-title';
+          title.textContent = `${index + 1}. ${item.suggested_title || item.subject || '(uten emne)'}`;
+
+          const meta = document.createElement('div');
+          meta.className = 'top-meta';
+          meta.textContent = `${item.priority || 0}/21 · ${statusLabel(item.status)} · ${item.sender_name || item.sender_email || 'Ukjent avsender'}`;
+
+          const connection = document.createElement('div');
+          connection.className = 'top-meta';
+          connection.textContent = item.fvn_connection ? `FVN: ${item.fvn_connection}` : 'Ingen FVN-kobling';
+
+          button.append(title, meta, connection);
+          els.topItems.append(button);
+        }
+      }
+
       function renderScoreGrid(item) {
         const scores = item.scores || {};
         const labels = {
@@ -679,8 +750,10 @@
       function selectItem(id) {
         state.selectedId = id;
         renderItems();
+        renderTopItems();
 
-        const item = state.items.find((candidate) => candidate.id === id);
+        const item = state.items.find((candidate) => candidate.id === id)
+          || state.topItems.find((candidate) => candidate.id === id);
         if (!item) return;
 
         els.detailTitle.textContent = item.subject || '(uten emne)';
@@ -752,6 +825,17 @@
         }
       }
 
+      async function loadTopItems() {
+        try {
+          const payload = await api('/api/debate/top?limit=10');
+          state.topItems = payload.items || [];
+          renderTopItems();
+        } catch (err) {
+          state.topItems = [];
+          renderTopItems();
+        }
+      }
+
       async function importMail() {
         setSideMessage('Importerer fra Outlook...');
         try {
@@ -795,6 +879,7 @@
           const index = state.items.findIndex((item) => item.id === state.selectedId);
           if (index >= 0) state.items[index] = payload.item;
           setSideMessage('Vurdering lagret.');
+          await loadTopItems();
           selectItem(state.selectedId);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
@@ -811,6 +896,7 @@
           const index = state.items.findIndex((item) => item.id === state.selectedId);
           if (index >= 0) state.items[index] = payload.item;
           setSideMessage('Status lagret.');
+          await loadTopItems();
           selectItem(state.selectedId);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
@@ -847,13 +933,13 @@
           formElement.reset();
           state.selectedId = payload.item.id;
           setSideMessage('Manuelt innlegg lagret.');
-          await loadItems();
+          await Promise.all([loadItems(), loadTopItems()]);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
         }
       });
 
-      loadStatus().then(() => Promise.all([loadItems(), loadFvnStories()]));
+      loadStatus().then(() => Promise.all([loadItems(), loadTopItems(), loadFvnStories()]));
     </script>
   </body>
 </html>
