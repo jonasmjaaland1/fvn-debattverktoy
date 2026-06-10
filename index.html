@@ -462,6 +462,43 @@
         padding: 12px;
       }
 
+      .brief-card {
+        background: #141618;
+        border: 1px solid #2b2e30;
+        border-radius: 8px;
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .brief-title {
+        font-weight: 850;
+      }
+
+      .brief-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .brief-row {
+        border-top: 1px solid #242729;
+        display: grid;
+        gap: 4px;
+        padding-top: 8px;
+      }
+
+      .brief-label {
+        color: #e7c16b;
+        font-size: 0.78rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .brief-text {
+        color: #d6d2c8;
+        line-height: 1.45;
+      }
+
       .story-list {
         border-top: 1px solid #2b2e30;
         display: grid;
@@ -1046,6 +1083,68 @@
         return grid;
       }
 
+      function parseEditorNote(note) {
+        const text = String(note || '').replace(/\s+/g, ' ').trim();
+        if (!text) return [];
+
+        const patterns = [
+          ['Konklusjon', /((?:Streng|Foreløpig) vurdering:[\s\S]*?)(?=\s+Lokal\/regional|$)/],
+          ['Lokal/regionalt', /(Lokal\/regional kobling[\s\S]*?)(?=\s+Offentlig relevans|$)/],
+          ['Offentlig relevans', /(Offentlig relevans[\s\S]*?)(?=\s+Nyanse\/avveining|$)/],
+          ['Flere sider', /(Nyanse\/avveining[\s\S]*?)(?=\s+(?:Mulig kobling|Ingen tydelig)|$)/],
+          ['FVN-kobling', /((?:Mulig kobling|Ingen tydelig)[\s\S]*)/],
+        ];
+
+        const rows = [];
+        for (const [label, pattern] of patterns) {
+          const match = text.match(pattern);
+          const value = match?.[1]?.trim();
+          if (value) rows.push({ label, value });
+        }
+
+        return rows.length ? rows : [{ label: 'Vurdering', value: text }];
+      }
+
+      function renderEditorBrief(item) {
+        const card = document.createElement('div');
+        card.className = 'brief-card';
+
+        const title = document.createElement('div');
+        title.className = 'brief-title';
+        title.textContent = 'Redaksjonell vurdering';
+
+        const rows = parseEditorNote(item.editor_note);
+        if (!rows.length) {
+          const empty = document.createElement('div');
+          empty.className = 'muted';
+          empty.textContent = 'Ingen vurdering kjørt ennå.';
+          card.append(title, empty);
+          return card;
+        }
+
+        const list = document.createElement('div');
+        list.className = 'brief-list';
+
+        for (const row of rows) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'brief-row';
+
+          const label = document.createElement('div');
+          label.className = 'brief-label';
+          label.textContent = row.label;
+
+          const value = document.createElement('div');
+          value.className = 'brief-text';
+          value.textContent = row.value;
+
+          wrapper.append(label, value);
+          list.append(wrapper);
+        }
+
+        card.append(title, list);
+        return card;
+      }
+
       function selectItem(id) {
         state.selectedId = id;
         renderItems();
@@ -1083,10 +1182,6 @@
 
         actions.append(evaluateButton, statusSelect, saveStatusButton);
 
-        const note = document.createElement('div');
-        note.className = item.risk_flags?.length ? 'notice' : 'muted';
-        note.textContent = item.editor_note || 'Ingen vurdering kjørt ennå.';
-
         const fvnConnection = document.createElement('div');
         fvnConnection.className = item.fvn_connection ? 'notice' : 'muted';
         fvnConnection.textContent = item.fvn_connection
@@ -1097,7 +1192,7 @@
         body.className = 'body-text';
         body.textContent = item.body_text || item.body_preview || 'Ingen tekst hentet.';
 
-        els.detailBody.append(actions, renderScoreGrid(item), note, fvnConnection);
+        els.detailBody.append(actions, renderScoreGrid(item), renderEditorBrief(item), fvnConnection);
 
         if (item.risk_flags?.length) {
           const risks = document.createElement('div');
