@@ -131,6 +131,18 @@ GET /api/fvn/latest?limit=20
 
 `limit` er hvor mange ferske kandidater som sjekkes i én kjøring. Bruk lavere tall for rask test og høyere tall for bredere dekning.
 
+## Strengere debattvurdering
+
+Vurderingen er laget for å være en redaksjonell førsteutsiling, ikke en publiseringsbeslutning. Den bruker disse portene:
+
+- Kandidater må ha høy samlet score, lokal/regional relevans, offentlig interesse, akseptabel lengde og ryddig språk/struktur.
+- Tekster uten tydelig lokal/regional forankring skal normalt ikke bli kandidat selv om de er velskrevne.
+- Tekster som er for korte, svært lange, har vedlegg, mangler avsender-e-post eller inneholder mulige personangrep/udokumenterte beskyldninger flagges til manuell vurdering.
+- Vurderingen forsøker å fjerne sitert e-posttråd, videresendingshoder og redaksjonelle svar før scoring.
+- Ved lik score sorteres topplisten etter faktisk mottakstidspunkt (`received_at`), ikke etter når vi importerte eller vurderte teksten.
+
+Scoringen bygger på kriteriene aktualitet, FVN-kobling, flere sider av saken, lokal/regional relevans, miks/stemme, offentlig relevans og språk/personlig stemme.
+
 ## Smoke-test
 
 Etter deploy:

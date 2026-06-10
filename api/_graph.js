@@ -1,3 +1,5 @@
+import { cleanSubmittedText, normalizeText } from './_text.js';
+
 const GRAPH_ROOT = 'https://graph.microsoft.com/v1.0';
 const GRAPH_SCOPE = 'https://graph.microsoft.com/.default';
 
@@ -121,18 +123,16 @@ async function fetchLatestMessages({ top = 25 } = {}) {
 }
 
 function cleanText(value) {
-  return String(value || '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return normalizeText(value);
 }
 
 function mapMessageToDebateItem(message, user) {
   const from = message.from?.emailAddress || message.sender?.emailAddress || {};
-  const bodyText = cleanText(message.body?.content || message.bodyPreview || '');
+  const originalBodyText = cleanText(message.body?.content || message.bodyPreview || '');
+  const bodyText = cleanSubmittedText(originalBodyText);
 
   return {
-    body_preview: cleanText(message.bodyPreview || bodyText.slice(0, 500)),
+    body_preview: cleanText(bodyText.slice(0, 500)),
     body_text: bodyText,
     categories: Array.isArray(message.categories) ? message.categories : [],
     conversation_id: message.conversationId || null,
@@ -141,7 +141,10 @@ function mapMessageToDebateItem(message, user) {
     imported_by_name: user?.name || null,
     internet_message_id: message.internetMessageId || null,
     message_id: message.id,
-    raw: message,
+    raw: {
+      ...message,
+      original_body_text: originalBodyText,
+    },
     received_at: message.receivedDateTime || null,
     sender_email: from.address || null,
     sender_name: from.name || null,

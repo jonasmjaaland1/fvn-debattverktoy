@@ -1,5 +1,6 @@
 import { json, requireUser } from '../_plan3.js';
 import { missingSupabaseResponse, upsertDebateItems } from '../_supabase.js';
+import { cleanSubmittedText } from '../_text.js';
 
 async function readJson(request) {
   try {
@@ -18,15 +19,16 @@ export async function POST(request) {
     return json({ error: 'subject and body_text are required' }, { status: 400 });
   }
 
+  const bodyText = cleanSubmittedText(body.body_text);
   const messageId = `manual:${crypto.randomUUID()}`;
   const item = {
-    body_preview: String(body.body_text).slice(0, 500),
-    body_text: String(body.body_text),
+    body_preview: bodyText.slice(0, 500),
+    body_text: bodyText,
     has_attachments: false,
     imported_by_email: auth.user.email,
     imported_by_name: auth.user.name,
     message_id: messageId,
-    raw: { manual: true },
+    raw: { manual: true, original_body_text: String(body.body_text) },
     received_at: new Date().toISOString(),
     sender_email: body.sender_email || null,
     sender_name: body.sender_name || null,
