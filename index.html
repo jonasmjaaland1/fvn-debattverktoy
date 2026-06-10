@@ -19,8 +19,9 @@
 
       body {
         margin: 0;
-        min-height: 100vh;
+        height: 100vh;
         background: #101112;
+        overflow: hidden;
       }
 
       button,
@@ -77,8 +78,8 @@
         display: flex;
         gap: 16px;
         justify-content: space-between;
-        min-height: 72px;
-        padding: 14px 24px;
+        min-height: 64px;
+        padding: 10px 18px;
       }
 
       .brand {
@@ -116,18 +117,22 @@
       main {
         display: grid;
         gap: 0;
-        grid-template-columns: 360px minmax(0, 1fr);
-        min-height: calc(100vh - 72px);
+        grid-template-columns: 300px minmax(0, 1fr);
+        height: calc(100vh - 64px);
+        min-height: 0;
       }
 
       aside {
         border-right: 1px solid #2b2e30;
-        padding: 18px;
+        min-height: 0;
+        overflow: auto;
+        padding: 14px;
       }
 
       .workspace {
         display: grid;
-        grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+        grid-template-columns: minmax(420px, 0.92fr) minmax(520px, 1.08fr);
+        min-height: 0;
         min-width: 0;
       }
 
@@ -148,6 +153,39 @@
       h2 {
         font-size: 0.95rem;
         margin: 0 0 12px;
+      }
+
+      .side-details {
+        border-top: 1px solid #2b2e30;
+        padding-top: 10px;
+      }
+
+      .side-details summary {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        font-weight: 800;
+        justify-content: space-between;
+        list-style: none;
+      }
+
+      .side-details summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .side-details summary::after {
+        color: #b7b7af;
+        content: "+";
+        font-weight: 800;
+      }
+
+      .side-details[open] summary::after {
+        content: "-";
+      }
+
+      .side-details > .stack,
+      .side-details > .story-list {
+        margin-top: 10px;
       }
 
       .stack {
@@ -198,10 +236,12 @@
 
       .list {
         border-right: 1px solid #2b2e30;
-        min-height: calc(100vh - 72px);
+        min-height: 0;
+        overflow: auto;
       }
 
       .top-overview {
+        background: #121416;
         border-bottom: 1px solid #2b2e30;
         padding: 14px 18px 16px;
       }
@@ -212,6 +252,35 @@
         gap: 12px;
         justify-content: space-between;
         margin-bottom: 10px;
+      }
+
+      .summary-strip {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 10px;
+      }
+
+      .summary-stat {
+        border: 1px solid #2b2e30;
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+
+      .summary-stat strong {
+        display: block;
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
+      .summary-stat span {
+        color: #b7b7af;
+        display: block;
+        font-size: 0.78rem;
+        margin-top: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .list-toolbar {
@@ -228,13 +297,15 @@
       }
 
       .item-row {
+        align-items: start;
         border: 0;
         border-bottom: 1px solid #242729;
         border-radius: 0;
         display: grid;
-        gap: 5px;
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr) auto;
         justify-items: stretch;
-        min-height: 92px;
+        min-height: 86px;
         padding: 13px 18px;
         text-align: left;
         width: 100%;
@@ -243,6 +314,12 @@
       .item-row.active {
         background: #202326;
         border-left: 4px solid #d9b45d;
+      }
+
+      .item-main {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
       }
 
       .item-title {
@@ -260,13 +337,84 @@
         gap: 8px;
       }
 
+      .item-preview {
+        color: #b7b7af;
+        display: -webkit-box;
+        line-height: 1.35;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .item-score,
+      .top-score {
+        border: 1px solid #3a3d3f;
+        border-radius: 8px;
+        color: #e7c16b;
+        min-width: 58px;
+        padding: 6px 8px;
+        text-align: center;
+      }
+
+      .item-score strong,
+      .top-score strong {
+        display: block;
+        font-size: 1rem;
+        line-height: 1;
+      }
+
+      .item-score span,
+      .top-score span {
+        color: #b7b7af;
+        display: block;
+        font-size: 0.72rem;
+        margin-top: 3px;
+      }
+
+      .status-pill {
+        border: 1px solid #3a3d3f;
+        border-radius: 999px;
+        color: #d6d2c8;
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 2px 7px;
+        white-space: nowrap;
+      }
+
+      .status-candidate {
+        border-color: #4f8f66;
+        color: #91d6a9;
+      }
+
+      .status-needs-edit,
+      .status-manual-review,
+      .status-hold {
+        border-color: #9d7d3d;
+        color: #e7c16b;
+      }
+
+      .status-rejected {
+        border-color: #7d3e39;
+        color: #ff9b92;
+      }
+
+      .status-published {
+        border-color: #4f789a;
+        color: #9bc7ef;
+      }
+
       .detail {
-        min-height: calc(100vh - 72px);
+        min-height: 0;
+        overflow: auto;
       }
 
       .detail-header {
+        background: #101112;
         border-bottom: 1px solid #2b2e30;
         padding: 18px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
       }
 
       .detail-title {
@@ -285,8 +433,6 @@
         border: 1px solid #2b2e30;
         border-radius: 8px;
         line-height: 1.55;
-        max-height: 360px;
-        overflow: auto;
         padding: 14px;
         white-space: pre-wrap;
       }
@@ -318,7 +464,7 @@
       .story-list {
         border-top: 1px solid #2b2e30;
         display: grid;
-        gap: 10px;
+        gap: 8px;
         margin-top: 4px;
         padding-top: 12px;
       }
@@ -329,7 +475,7 @@
         color: inherit;
         display: grid;
         gap: 4px;
-        padding: 10px;
+        padding: 9px;
         text-decoration: none;
       }
 
@@ -355,11 +501,13 @@
       }
 
       .top-row {
+        align-items: center;
         border: 1px solid #2b2e30;
         border-radius: 8px;
         display: grid;
-        gap: 6px;
-        padding: 10px;
+        gap: 10px;
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+        padding: 9px;
         text-align: left;
         width: 100%;
       }
@@ -369,14 +517,48 @@
         border-color: #d9b45d;
       }
 
+      .top-rank {
+        align-items: center;
+        background: #202326;
+        border-radius: 999px;
+        color: #f5f5f0;
+        display: flex;
+        font-size: 0.78rem;
+        font-weight: 900;
+        height: 28px;
+        justify-content: center;
+        width: 28px;
+      }
+
+      .top-main {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
+      }
+
       .top-title {
         font-weight: 800;
         line-height: 1.25;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .top-meta {
+        align-items: center;
         color: #b7b7af;
+        display: flex;
+        flex-wrap: wrap;
         font-size: 0.82rem;
+        gap: 8px;
+      }
+
+      .top-connection {
+        color: #b7b7af;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .error {
@@ -396,14 +578,26 @@
           flex-direction: column;
         }
 
+        body {
+          height: auto;
+          overflow: auto;
+        }
+
         main,
         .workspace {
           grid-template-columns: 1fr;
+          height: auto;
         }
 
         aside,
+        .detail,
         .list {
           border-right: 0;
+          overflow: visible;
+        }
+
+        .summary-strip {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
     </style>
@@ -455,19 +649,24 @@
             <button type="button" id="importFvnButton">Hent FVN-saker siste 14 dager</button>
             <button type="button" id="refreshButton">Oppdater liste</button>
             <div id="sideMessage" class="muted"></div>
-            <div id="fvnStories" class="story-list"></div>
+            <details class="side-details" open>
+              <summary>FVN-saker</summary>
+              <div id="fvnStories" class="story-list"></div>
+            </details>
           </div>
         </section>
 
         <section class="panel">
-          <h2>Manuell test</h2>
-          <form id="manualForm" class="stack">
-            <input name="subject" placeholder="Tittel/emne" autocomplete="off" />
-            <input name="sender_name" placeholder="Avsendernavn" autocomplete="off" />
-            <input name="sender_email" placeholder="Avsender e-post" autocomplete="off" />
-            <textarea name="body_text" placeholder="Lim inn leserinnlegg"></textarea>
-            <button type="submit">Lagre manuelt innlegg</button>
-          </form>
+          <details class="side-details">
+            <summary>Manuell test</summary>
+            <form id="manualForm" class="stack">
+              <input name="subject" placeholder="Tittel/emne" autocomplete="off" />
+              <input name="sender_name" placeholder="Avsendernavn" autocomplete="off" />
+              <input name="sender_email" placeholder="Avsender e-post" autocomplete="off" />
+              <textarea name="body_text" placeholder="Lim inn leserinnlegg"></textarea>
+              <button type="submit">Lagre manuelt innlegg</button>
+            </form>
+          </details>
         </section>
       </aside>
 
@@ -480,6 +679,24 @@
                 <div class="muted">Rangert etter samlet vurderingsscore</div>
               </div>
               <button type="button" id="refreshTopButton">Oppdater</button>
+            </div>
+            <div class="summary-strip">
+              <div class="summary-stat">
+                <strong id="statTotal">0</strong>
+                <span>Innlegg</span>
+              </div>
+              <div class="summary-stat">
+                <strong id="statCandidate">0</strong>
+                <span>Kandidater</span>
+              </div>
+              <div class="summary-stat">
+                <strong id="statNeedsEdit">0</strong>
+                <span>Trenger redigering</span>
+              </div>
+              <div class="summary-stat">
+                <strong id="statManual">0</strong>
+                <span>Manuell vurdering</span>
+              </div>
             </div>
             <div id="topItems" class="top-list"></div>
           </div>
@@ -515,6 +732,7 @@
     <script>
       const state = {
         items: [],
+        overviewItems: [],
         selectedId: null,
         stories: [],
         topItems: [],
@@ -533,6 +751,10 @@
         newsroomLogo: document.getElementById('newsroomLogo'),
         plan3Status: document.getElementById('plan3Status'),
         sideMessage: document.getElementById('sideMessage'),
+        statCandidate: document.getElementById('statCandidate'),
+        statManual: document.getElementById('statManual'),
+        statNeedsEdit: document.getElementById('statNeedsEdit'),
+        statTotal: document.getElementById('statTotal'),
         statusFilter: document.getElementById('statusFilter'),
         supabaseStatus: document.getElementById('supabaseStatus'),
         topItems: document.getElementById('topItems'),
@@ -599,6 +821,41 @@
             rejected: 'Avvist',
           }[status] || status || 'Ukjent'
         );
+      }
+
+      function statusClass(status) {
+        return `status-${String(status || 'unknown').replace(/_/g, '-')}`;
+      }
+
+      function createStatusPill(status) {
+        const pill = document.createElement('span');
+        pill.className = `status-pill ${statusClass(status)}`;
+        pill.textContent = statusLabel(status);
+        return pill;
+      }
+
+      function createScoreBox(item, className) {
+        const box = document.createElement('div');
+        box.className = className;
+
+        const score = document.createElement('strong');
+        score.textContent = item.priority ?? '-';
+
+        const label = document.createElement('span');
+        label.textContent = item.priority === null || item.priority === undefined ? 'ikke vurdert' : '/21';
+
+        box.append(score, label);
+        return box;
+      }
+
+      function renderStats() {
+        const items = state.overviewItems.length ? state.overviewItems : state.items;
+        const count = (status) => items.filter((item) => item.status === status).length;
+
+        els.statTotal.textContent = items.length;
+        els.statCandidate.textContent = count('candidate');
+        els.statNeedsEdit.textContent = count('needs_edit');
+        els.statManual.textContent = count('manual_review');
       }
 
       async function loadStatus() {
@@ -671,6 +928,7 @@
       function renderItems() {
         els.items.textContent = '';
         els.countLine.textContent = `(${state.items.length})`;
+        renderStats();
 
         if (!state.items.length) {
           const empty = document.createElement('div');
@@ -686,19 +944,27 @@
           button.className = `item-row ${item.id === state.selectedId ? 'active' : ''}`;
           button.addEventListener('click', () => selectItem(item.id));
 
+          const main = document.createElement('div');
+          main.className = 'item-main';
+
           const title = document.createElement('div');
           title.className = 'item-title';
           title.textContent = item.subject || '(uten emne)';
 
           const meta = document.createElement('div');
           meta.className = 'item-meta';
-          meta.textContent = `${statusLabel(item.status)} · ${item.sender_name || item.sender_email || 'Ukjent avsender'} · ${formatDate(item.received_at)}`;
+          const sender = document.createElement('span');
+          sender.textContent = item.sender_name || item.sender_email || 'Ukjent avsender';
+          const received = document.createElement('span');
+          received.textContent = formatDate(item.received_at);
+          meta.append(createStatusPill(item.status), sender, received);
 
           const preview = document.createElement('div');
-          preview.className = 'muted';
+          preview.className = 'item-preview';
           preview.textContent = item.body_preview || '';
 
-          button.append(title, meta, preview);
+          main.append(title, meta, preview);
+          button.append(main, createScoreBox(item, 'item-score'));
           els.items.append(button);
         }
       }
@@ -720,19 +986,29 @@
           button.className = `top-row ${item.id === state.selectedId ? 'active' : ''}`;
           button.addEventListener('click', () => selectItem(item.id));
 
+          const rank = document.createElement('div');
+          rank.className = 'top-rank';
+          rank.textContent = index + 1;
+
+          const main = document.createElement('div');
+          main.className = 'top-main';
+
           const title = document.createElement('div');
           title.className = 'top-title';
-          title.textContent = `${index + 1}. ${item.suggested_title || item.subject || '(uten emne)'}`;
+          title.textContent = item.suggested_title || item.subject || '(uten emne)';
 
           const meta = document.createElement('div');
           meta.className = 'top-meta';
-          meta.textContent = `${item.priority || 0}/21 · ${statusLabel(item.status)} · ${item.sender_name || item.sender_email || 'Ukjent avsender'}`;
+          const sender = document.createElement('span');
+          sender.textContent = item.sender_name || item.sender_email || 'Ukjent avsender';
+          meta.append(createStatusPill(item.status), sender);
 
           const connection = document.createElement('div');
-          connection.className = 'top-meta';
+          connection.className = 'top-connection';
           connection.textContent = item.fvn_connection ? `FVN: ${item.fvn_connection}` : 'Ingen FVN-kobling';
 
-          button.append(title, meta, connection);
+          main.append(title, meta, connection);
+          button.append(rank, main, createScoreBox(item, 'top-score'));
           els.topItems.append(button);
         }
       }
@@ -835,7 +1111,9 @@
           const status = els.statusFilter.value;
           const payload = await api(`/api/debate/list?limit=50${status ? `&status=${encodeURIComponent(status)}` : ''}`);
           state.items = payload.items || [];
-          if (!state.selectedId && state.items[0]) state.selectedId = state.items[0].id;
+          if (!state.items.some((item) => item.id === state.selectedId)) {
+            state.selectedId = state.items[0]?.id || null;
+          }
           renderItems();
           if (state.selectedId) selectItem(state.selectedId);
         } catch (err) {
@@ -843,6 +1121,16 @@
           renderItems();
           setSideMessage(friendlyError(err), true);
         }
+      }
+
+      async function loadStats() {
+        try {
+          const payload = await api('/api/debate/list?limit=200');
+          state.overviewItems = payload.items || [];
+        } catch (err) {
+          state.overviewItems = [];
+        }
+        renderStats();
       }
 
       async function loadTopItems() {
@@ -861,7 +1149,7 @@
         try {
           const payload = await api('/api/mail/import?top=25', { method: 'POST' });
           setSideMessage(`Importerte/oppdaterte ${payload.count} innlegg.`);
-          await loadItems();
+          await Promise.all([loadItems(), loadTopItems(), loadStats()]);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
         }
@@ -899,7 +1187,7 @@
           const index = state.items.findIndex((item) => item.id === state.selectedId);
           if (index >= 0) state.items[index] = payload.item;
           setSideMessage('Vurdering lagret.');
-          await loadTopItems();
+          await Promise.all([loadTopItems(), loadStats()]);
           selectItem(state.selectedId);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
@@ -916,7 +1204,7 @@
           const index = state.items.findIndex((item) => item.id === state.selectedId);
           if (index >= 0) state.items[index] = payload.item;
           setSideMessage('Status lagret.');
-          await loadTopItems();
+          await Promise.all([loadTopItems(), loadStats()]);
           selectItem(state.selectedId);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
@@ -931,8 +1219,8 @@
         window.location.assign('/api/auth/logout');
       });
 
-      document.getElementById('refreshButton').addEventListener('click', loadItems);
-      document.getElementById('refreshTopButton').addEventListener('click', loadTopItems);
+      document.getElementById('refreshButton').addEventListener('click', () => Promise.all([loadItems(), loadTopItems(), loadStats(), loadFvnStories()]));
+      document.getElementById('refreshTopButton').addEventListener('click', () => Promise.all([loadTopItems(), loadStats()]));
       document.getElementById('importButton').addEventListener('click', importMail);
       document.getElementById('importFvnButton').addEventListener('click', importFvnStories);
       document.getElementById('previewMailButton').addEventListener('click', previewMail);
@@ -954,13 +1242,13 @@
           formElement.reset();
           state.selectedId = payload.item.id;
           setSideMessage('Manuelt innlegg lagret.');
-          await Promise.all([loadItems(), loadTopItems()]);
+          await Promise.all([loadItems(), loadTopItems(), loadStats()]);
         } catch (err) {
           setSideMessage(friendlyError(err), true);
         }
       });
 
-      loadStatus().then(() => Promise.all([loadItems(), loadTopItems(), loadFvnStories()]));
+      loadStatus().then(() => Promise.all([loadItems(), loadTopItems(), loadStats(), loadFvnStories()]));
     </script>
   </body>
 </html>
