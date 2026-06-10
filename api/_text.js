@@ -1,6 +1,6 @@
-const EMAIL_HEADER_RE = /^(fra|from|sendt|sent|til|to|kopi|cc|emne|subject|dato|date):\s+/i;
+const EMAIL_HEADER_RE = /^\*?(fra|from|sendt|sent|til|to|kopi|cc|emne|subject|dato|date)\*?:\s+/i;
 const REPLY_BOUNDARY_RE = /^(-{2,}\s*)?(opprinnelig melding|original message|forwarded message|videresendt melding)(\s*-{2,})?$/i;
-const WROTE_RE = /^(den|on)\s+.+(skrev|wrote):\s*$/i;
+const WROTE_RE = /(^((den|on)\s+.+\s+)?(skrev|wrote):\s*$)|(.+\s+(skrev|wrote|yazd[ıi]|şunu yazd[ıi]):\s*$)/i;
 
 function normalizeText(value) {
   return String(value || '')
@@ -19,15 +19,35 @@ function countWords(value) {
 }
 
 function isDivider(line) {
-  return /^[_-]{6,}\s*$/.test(line.trim());
+  return /^[_-]{6,}\s*$/.test(stripQuotePrefix(line).trim());
+}
+
+function stripQuotePrefix(line) {
+  return String(line || '').replace(/^\s*(>\s*)+/, '');
+}
+
+function normalizeHeaderLine(line) {
+  return stripQuotePrefix(line)
+    .trim()
+    .replace(/^\*([^*]+)\*:\s*/, '$1: ')
+    .replace(/^\*([^*]+):\*\s*/, '$1: ');
 }
 
 function isHeaderLine(line) {
-  return EMAIL_HEADER_RE.test(line.trim());
+  return EMAIL_HEADER_RE.test(normalizeHeaderLine(line));
+}
+
+function parseHeaderLine(line) {
+  const match = normalizeHeaderLine(line).match(EMAIL_HEADER_RE);
+  if (!match) return null;
+
+  const label = match[1].toLowerCase();
+  const value = normalizeHeaderLine(line).replace(EMAIL_HEADER_RE, '').trim();
+  return { label, value };
 }
 
 function isReplyBoundary(line) {
-  const trimmed = line.trim();
+  const trimmed = stripQuotePrefix(line).trim();
   return isDivider(trimmed) || REPLY_BOUNDARY_RE.test(trimmed) || WROTE_RE.test(trimmed);
 }
 
@@ -47,7 +67,7 @@ function looksLikeEditorHeader(line) {
 function stripHeaderBlock(lines, startIndex) {
   let index = startIndex;
 
-  while (index < lines.length && (isHeaderLine(lines[index]) || !lines[index].trim())) {
+  while (index < lines.length && (isHeaderLine(lines[index]) || !stripQuotePrefix(lines[index]).trim() || isDivider(lines[index]))) {
     index += 1;
   }
 
@@ -57,7 +77,7 @@ function stripHeaderBlock(lines, startIndex) {
 function removeHeaderBlocks(lines) {
   const cleaned = [];
   for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
+    const line = stripQuotePrefix(lines[index]);
 
     if (isHeaderLine(line)) {
       index = stripHeaderBlock(lines, index) - 1;
@@ -71,6 +91,77 @@ function removeHeaderBlocks(lines) {
     cleaned.push(line);
   }
   return cleaned;
+}
+
+function parseHeaderBlock(lines, startIndex) {
+  let index = startIndex;
+  const headers = {};
+  let seenHeaders = 0;
+
+  while (index < lines.length && (isDivider(lines[index]) || !stripQuotePrefix(lines[index]).trim())) {
+    index += 1;
+  }
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const header = parseHeaderLine(line);
+    if (!header) break;
+
+    headers[header.label] = header.value;
+    seenHeaders += 1;
+    index += 1;
+
+    while (index < lines.length && !stripQuotePrefix(lines[index]).trim()) {
+      index += 1;
+    }
+  }
+
+  if (seenHeaders < 2) return null;
+  return { endIndex: index, headers };
+}
+
+function headerValue(headers, ...labels) {
+  for (const label of labels) {
+    if (headers[label]) return headers[label];
+  }
+  return '';
+}
+
+function removeTrailingQuoteNoise(value) {
+  return normalizeText(value)
+    .split('\n')
+    .filter((line) => !/^\s*>?\s*$/.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function originalSubmissionCandidates(value) {
+  const lines = normalizeText(value).split('\n');
+  const candidates = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const block = parseHeaderBlock(lines, index);
+    if (!block) continue;
+
+    const from = headerValue(block.headers, 'fra', 'from').toLowerCase();
+    const to = headerValue(block.headers, 'til', 'to').toLowerCase();
+    const subject = headerValue(block.headers, 'emne', 'subject');
+    const looksLikeInbound = to.includes('fvn') || to.includes('debatt@') || subject;
+    const looksLikeEditor = from.includes('@fvn.no') || from.includes('fvn debatt') || from.includes('fvn folk');
+
+    if (looksLikeInbound && !looksLikeEditor) {
+      const body = removeTrailingQuoteNoise(removeHeaderBlocks(lines.slice(block.endIndex)).join('\n'));
+      const words = countWords(body);
+      if (words >= 40) {
+        candidates.push({ body, words });
+      }
+    }
+
+    index = block.endIndex;
+  }
+
+  return candidates.sort((a, b) => b.words - a.words).map((candidate) => candidate.body);
 }
 
 function stripQuotedReply(value) {
@@ -98,14 +189,20 @@ function stripQuotedReply(value) {
 }
 
 function cleanSubmittedText(value) {
+  const originalCandidates = originalSubmissionCandidates(value);
   const withoutQuotedReply = stripQuotedReply(value);
   const lines = withoutQuotedReply.split('\n');
-  const cleaned = removeHeaderBlocks(lines)
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  const cleaned = removeTrailingQuoteNoise(removeHeaderBlocks(lines).join('\n'));
 
-  return cleaned;
+  if (originalCandidates.length && countWords(cleaned) < 40) {
+    return originalCandidates[0];
+  }
+
+  if (originalCandidates.length && hasEmailThreadArtifacts(cleaned) && countWords(originalCandidates[0]) > countWords(cleaned)) {
+    return originalCandidates[0];
+  }
+
+  return cleaned || originalCandidates[0] || '';
 }
 
 function hasEmailThreadArtifacts(value) {
@@ -114,7 +211,7 @@ function hasEmailThreadArtifacts(value) {
 
   const lines = text.split('\n');
   const headerLines = lines.filter(isHeaderLine).length;
-  return headerLines >= 3 || lines.some(isReplyBoundary);
+  return headerLines >= 3 || lines.some(isReplyBoundary) || lines.some((line) => /^\s*>/.test(line));
 }
 
 export {

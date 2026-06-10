@@ -53,6 +53,55 @@ const NUANCE_TERMS = [
   'for det andre',
 ];
 
+const STORY_STOP_WORDS = new Set([
+  'alle',
+  'andre',
+  'bare',
+  'blant',
+  'ble',
+  'blir',
+  'denne',
+  'derfor',
+  'dette',
+  'disse',
+  'eller',
+  'etter',
+  'finne',
+  'flere',
+  'fortsatt',
+  'første',
+  'gjennom',
+  'ingen',
+  'ikke',
+  'kommer',
+  'kroner',
+  'kunne',
+  'leder',
+  'mange',
+  'millioner',
+  'mest',
+  'noen',
+  'norge',
+  'saken',
+  'sier',
+  'skal',
+  'skrev',
+  'slik',
+  'slutt',
+  'start',
+  'stiller',
+  'store',
+  'under',
+  'viser',
+  'vurderer',
+  'være',
+  'vært',
+  'verden',
+  'vinner',
+]);
+
+const STORY_SHORT_KEYWORDS = new Set(['bpa', 'e18']);
+
 const RISK_PATTERNS = [
   { flag: 'mulig personangrep', pattern: /\b(idiot|korrupt|svindler|løgner|rasist)\b/i },
   { flag: 'sterk udokumentert beskyldning', pattern: /\b(kriminell|bedrageri|underslag|bestikkelser?)\b/i },
@@ -63,7 +112,8 @@ const RISK_PATTERNS = [
 ];
 
 function textOf(item) {
-  return [item.subject, cleanSubmittedText(item.body_text), cleanSubmittedText(item.body_preview)]
+  const body = cleanSubmittedText(item.body_text || item.body_preview);
+  return [item.subject, body]
     .filter(Boolean)
     .join('\n\n')
     .toLowerCase();
@@ -143,7 +193,7 @@ function detectRisks(item) {
     flags.push('svært langt innlegg');
   }
 
-  if (hasEmailThreadArtifacts(item.body_text || item.body_preview)) {
+  if (hasEmailThreadArtifacts(cleanedBody)) {
     flags.push('inneholder e-posttråd eller sitert svar');
   }
 
@@ -165,19 +215,16 @@ function storyMatches(item, stories = []) {
     .map((story) => {
       const storyText = [
         story.title,
-        story.ingress,
-        story.section,
         ...(story.tags || []),
-        story.raw?.body_text,
       ].filter(Boolean).join(' ');
       const titleWords = String(storyText || '')
         .toLowerCase()
         .split(/[^a-zæøå0-9]+/i)
-        .filter((word) => word.length >= 5 && !['dette', 'eller', 'etter', 'ingen', 'siste', 'viser'].includes(word));
+        .filter((word) => (word.length >= 5 || STORY_SHORT_KEYWORDS.has(word)) && !STORY_STOP_WORDS.has(word) && !LOCAL_TERMS.includes(word));
       const hits = [...new Set(titleWords.filter((word) => text.includes(word)))];
       return { story, hits };
     })
-    .filter((match) => match.hits.length >= 2)
+    .filter((match) => match.hits.length >= 2 && match.hits.join('').length >= 14)
     .slice(0, 3);
 }
 
