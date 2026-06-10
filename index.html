@@ -1001,7 +1001,9 @@
           meta.className = 'top-meta';
           const sender = document.createElement('span');
           sender.textContent = item.sender_name || item.sender_email || 'Ukjent avsender';
-          meta.append(createStatusPill(item.status), sender);
+          const received = document.createElement('span');
+          received.textContent = formatDate(item.received_at);
+          meta.append(createStatusPill(item.status), sender, received);
 
           const connection = document.createElement('div');
           connection.className = 'top-connection';

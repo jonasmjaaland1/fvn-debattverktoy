@@ -102,7 +102,7 @@ async function listTopDebateItems({ limit = 10 } = {}) {
   return supabaseRequest('debate_items', {
     searchParams: {
       select: '*',
-      order: 'priority.desc,updated_at.desc',
+      order: 'priority.desc,received_at.desc.nullslast,updated_at.desc',
       limit,
       priority: 'gt.0',
     },
