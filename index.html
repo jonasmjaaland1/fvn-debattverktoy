@@ -201,6 +201,19 @@
         min-height: calc(100vh - 72px);
       }
 
+      .top-overview {
+        border-bottom: 1px solid #2b2e30;
+        padding: 14px 18px 16px;
+      }
+
+      .overview-header {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
       .list-toolbar {
         align-items: center;
         border-bottom: 1px solid #2b2e30;
@@ -336,7 +349,9 @@
 
       .top-list {
         display: grid;
-        gap: 10px;
+        gap: 8px;
+        max-height: 280px;
+        overflow: auto;
       }
 
       .top-row {
@@ -454,15 +469,20 @@
             <button type="submit">Lagre manuelt innlegg</button>
           </form>
         </section>
-
-        <section class="panel">
-          <h2>Beste vurderte</h2>
-          <div id="topItems" class="top-list"></div>
-        </section>
       </aside>
 
       <div class="workspace">
         <section class="list">
+          <div class="top-overview">
+            <div class="overview-header">
+              <div>
+                <strong>Beste vurderte</strong>
+                <div class="muted">Rangert etter samlet vurderingsscore</div>
+              </div>
+              <button type="button" id="refreshTopButton">Oppdater</button>
+            </div>
+            <div id="topItems" class="top-list"></div>
+          </div>
           <div class="list-toolbar">
             <div>
               <strong>Innlegg</strong>
@@ -912,6 +932,7 @@
       });
 
       document.getElementById('refreshButton').addEventListener('click', loadItems);
+      document.getElementById('refreshTopButton').addEventListener('click', loadTopItems);
       document.getElementById('importButton').addEventListener('click', importMail);
       document.getElementById('importFvnButton').addEventListener('click', importFvnStories);
       document.getElementById('previewMailButton').addEventListener('click', previewMail);
